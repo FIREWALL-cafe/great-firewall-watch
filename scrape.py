@@ -116,4 +116,4 @@ def run(total_hours, hourly_limit=200, fname="termlist.json", shuffle=True):
     print("took", printable_time(seconds=time.time() - start_ts))
 
 if __name__ == "__main__":
-    run(.1)
+    run(5, shuffle=False)
