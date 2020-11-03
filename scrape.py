@@ -1,4 +1,6 @@
+from output import write_error
 from termlist import load_termlist
+from user_agent import get_user_agent
 
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -11,10 +13,11 @@ import time
 
 def query_baidu(term):
     baidu_template = 'https://image.baidu.com/search/index?tn=baiduimage&word={}'
+    user_agent = get_user_agent()
     url = 'https://image.baidu.com/search/flip?tn=baiduimage&ie=utf-8&word='+term+'&ct=201326592&v=flip'
     r = requests.get(url, timeout=10,
                 proxies={'https':None, 'http':None},
-                headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'})
+                headers={'User-Agent':user_agent})
     urls = re.findall('"objURL":"(.*?)",',r.text,re.S)
     return urls
 
@@ -114,4 +117,5 @@ def run(total_hours, hourly_limit=200, shuffle=True):
     print("took", printable_time(seconds=time.time() - start_ts))
 
 if __name__ == "__main__":
-    run(5, shuffle=False)
+    # run(.05, shuffle=False)
+    write_error("testing the error reporting method")
