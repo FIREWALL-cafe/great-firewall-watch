@@ -8,6 +8,7 @@ def load_config():
 def get_json():
     url = load_config()['url']
     r = requests.get(url)
+    # print(r.status_code, r.text)
     return r.json()
 
 

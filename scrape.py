@@ -37,7 +37,7 @@ def printable_time(days=0, hours=0, minutes=0, seconds=0):
     remainder = total_seconds % (24*60*60)
     return f"{total_days} days, {printable_time(seconds=remainder)}"
 
-def run(total_hours, hourly_limit=200, fname="termlist.json", shuffle=True):
+def run(total_hours, hourly_limit=200, shuffle=True):
     google_fails = []
     baidu_fails = []
 
@@ -49,7 +49,7 @@ def run(total_hours, hourly_limit=200, fname="termlist.json", shuffle=True):
     wait_time = total_time / total_requests
     daily_max_requests = hourly_limit * 24
 
-    termlist = load_termlist(fname)
+    termlist = load_termlist()
 
     if shuffle:
         print("shuffling termlist")
