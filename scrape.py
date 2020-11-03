@@ -1,3 +1,5 @@
+from termlist import load_termlist
+
 from bs4 import BeautifulSoup
 from datetime import datetime
 import json
@@ -22,10 +24,6 @@ def query_google(term):
     soup = BeautifulSoup(r.text, features="html.parser")
     urls = [tag.get('src') for tag in soup.find_all('img') if tag.get('src')[:4] == 'http']
     return urls
-
-def load_termlist(fname="termlist.json"):
-    with open(fname) as f:
-        return json.loads(f.read())
 
 def printable_time(days=0, hours=0, minutes=0, seconds=0):
     total_seconds = 24*60*60*days + 60*60*hours + 60*minutes + seconds
