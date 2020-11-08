@@ -1,5 +1,5 @@
-from output import write_error
-from termlist import load_termlist
+from spaces_interface import load_termlist, write_error, write_search_results, write_logs
+from storage import save_search_results
 from user_agent import get_user_agent
 
 from bs4 import BeautifulSoup
@@ -69,29 +69,29 @@ def run(total_hours, hourly_limit=200, shuffle=True):
     for i in range(0, total_requests):
         start_iter_ts = time.time()
         try:
-            term = termlist[term_idx]
+            english_term = termlist[term_idx]['english']
+            chinese_term = termlist[term_idx]['chinese']
         except:
             print("out of terms")
             break
-        print(f'{i}: "{term}"')
+        print(f'{i}: "{english_term}", "{chinese_term}"')
         try:
-            urls = query_google(term)
+            urls = query_google(english_term)
             print(f"\tgoogle got {len(urls)} images")
             result = {}
-            result['term'] = term
+            result['english_term'] = english_term
+            result['chinese_term'] = chinese_term
             result['urls'] = urls
             result['ts'] = time.time()
             google_results.append(result)
         except Exception as e:
-            # google_results['term'] = term
-            # google_results['error'] = str(e)
             google_fails.append(e)
             print("\tgoogle fail", e)
         try:
-            urls = query_baidu(term)
+            urls = query_baidu(english_term)
             print(f"\tbaidu got {len(urls)} images")
             result = {}
-            result['term'] = term
+            result['english_term'] = english_term
             result['urls'] = urls[:20]
             result['ts'] = time.time()
             baidu_results.append(result)
@@ -108,14 +108,19 @@ def run(total_hours, hourly_limit=200, shuffle=True):
         # print("adding noise to wait time", printable_time(seconds=time_noise))
 
         # cache results. this is a backup and not meant to be a reliable data store
-        datestring = str(datetime.utcnow().date())
-        with open(f'search_results/google_searches_{datestring}.json', 'w') as f:
-            f.write(json.dumps(google_results))
-        with open(f'search_results/baidu_searches_{datestring}.json', 'w') as f:
-            f.write(json.dumps(baidu_results))
+        try:
+            import os
+            os.mkdir('search_results')
+        except Exception as e:
+            print("could not make directory", e)
+        # write_search_results(f'search_results/google_searches_{datestring}.json', google_results)
+        google_img_count = write_search_results(google_results, 'google')
+        # write_search_results(f'search_results/baidu_searches_{datestring}.json', baidu_results)
+        baidu_img_count = write_search_results(baidu_results, 'baidu')
+        write_logs(f'wrote {google_img_count} google images and {baidu_img_count} baidu images')
         time.sleep(max(0, wait_time - took + time_noise))
     print("took", printable_time(seconds=time.time() - start_ts))
 
 if __name__ == "__main__":
-    # run(.05, shuffle=False)
-    write_error("testing the error reporting method")
+    run(.005, shuffle=False)
+    # write_error("testing the error reporting method")
