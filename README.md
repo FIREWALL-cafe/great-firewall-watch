@@ -4,6 +4,10 @@ Automated tracking of censorship via image search results, for the [Firewall Caf
 
 The scraper is designed to be called by a regular cron job, making its way through a list of terms to be searched on Google and Baidu. It relies on DigitalOcean spaces for the term list, as well as outputting logs and storing images.
 
+## Installing and deploying
+
+TODO: how to test locally, how to deploy to DO
+
 ## Using the scraper
 
 TODO: how to update search terms, read logs, and collect image sets
