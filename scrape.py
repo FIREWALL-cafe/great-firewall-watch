@@ -71,8 +71,8 @@ def run(total_hours, hourly_limit=200, shuffle=True):
     for i in range(0, total_requests):
         start_iter_ts = time.time()
         try:
-            english_term = termlist[term_idx]['english']
-            chinese_term = termlist[term_idx]['chinese']
+            english_term = termlist.loc[term_idx].english
+            chinese_term = termlist.loc[term_idx].chinese
         except:
             print("out of terms")
             break

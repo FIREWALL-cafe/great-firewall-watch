@@ -124,49 +124,32 @@ def load_config():
     with open('config.json') as f:
         return json.loads(f.read())
 
-def write_csv(termlist):
+def write_termlist(df):
     fname = "termlist.xlsx"
-    with open(fname, "w", newline="") as csv_file:
-        cols = ["english", "chinese"] 
-        writer = csv.DictWriter(csv_file, fieldnames=cols)
-        writer.writeheader()
-        writer.writerows(termlist)
+    df.to_csv(fname)
 
     # upload the file we just wrote
     transfer.upload_file(fname, j['bucket'], fname)
     # make that file public
     r = client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key=fname)
     print(r)
-
+    
 def load_termlist():
     config = load_config()
     base_url = f'https://{config["bucket"]}.{config["region"]}.digitaloceanspaces.com/'
     df = read_excel(base_url + 'termlist.xlsx')
-    termlist = []
     needs_translation = False
     for i,row in df.fillna('').iterrows():
         try:
             english = row['english']
             chinese = row['chinese']
-            termlist.append({'english': english, 'chinese': chinese})
         except Exception as e:
             print("could not parse row:", row, e)
             continue        
         if (english and not chinese) or (chinese and not english):
             needs_translation = True
-    # for row in csv.DictReader(r.text.split('\n'), delimiter=','):
-    #     try:
-    #         english = row['english']
-    #         chinese = row['chinese']
-    #         termlist.append({'english': english, 'chinese': chinese})
-    #     except Exception as e:
-    #         print("could not parse row:", row, e)
-    #         continue
-    #     if (english and not chinese) or (chinese and not english):
-    #         needs_translation = True
     if needs_translation:
-        termlist = machine_translate(termlist)
-    # return termlist
-    return []
+        df = machine_translate(df)
+    return df
 
 # print(load_termlist())
