@@ -158,4 +158,4 @@ def load_termlist():
         termlist = machine_translate(termlist)
     return termlist
 
-print(load_termlist())
+# print(load_termlist())

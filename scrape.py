@@ -11,6 +11,8 @@ import re
 import requests
 import time
 
+MAX_PICTURES_PER = 10
+
 def query_baidu(term):
     baidu_template = 'https://image.baidu.com/search/index?tn=baiduimage&word={}'
     user_agent = get_user_agent()
@@ -81,7 +83,7 @@ def run(total_hours, hourly_limit=200, shuffle=True):
             result = {}
             result['english_term'] = english_term
             result['chinese_term'] = chinese_term
-            result['urls'] = urls
+            result['urls'] = urls[:MAX_PICTURES_PER]
             result['ts'] = time.time()
             google_results.append(result)
         except Exception as e:
@@ -92,7 +94,7 @@ def run(total_hours, hourly_limit=200, shuffle=True):
             print(f"\tbaidu got {len(urls)} images")
             result = {}
             result['english_term'] = english_term
-            result['urls'] = urls[:20]
+            result['urls'] = urls[:MAX_PICTURES_PER]
             result['ts'] = time.time()
             baidu_results.append(result)
         except Exception as e:
