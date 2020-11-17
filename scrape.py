@@ -122,5 +122,8 @@ def run(total_hours, hourly_limit=200, shuffle=True):
     print("took", printable_time(seconds=time.time() - start_ts))
 
 if __name__ == "__main__":
+    # try:
     run(.005, shuffle=False)
-    # write_error("testing the error reporting method")
+    # except Exception as e:
+    #     print("during run(), an error occurred", e)
+    #     write_error(str(datetime.now()) + ': ' + str(e))

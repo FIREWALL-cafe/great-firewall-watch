@@ -17,7 +17,8 @@ class Translator():
         ).json()
         if j['ok'] > 0:
             return j['translated']
-        else return ''
+        else:
+            return ''
 
     def to_english(self, text, source_language='zh-CN'):
         j = requests.post(self.endpoint,
@@ -25,7 +26,8 @@ class Translator():
         ).json()
         if j['ok'] > 0:
             return j['translated']
-        else return ''
+        else:
+            return ''
 
 def machine_translate(termlist):
     print("running machine translation on list")

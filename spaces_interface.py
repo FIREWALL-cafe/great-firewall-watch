@@ -90,7 +90,10 @@ def write_search_results(contents, search_engine):
     json_fname = f'search_results/{search_engine}_searches_{datestring}.json'
     r = requests.get(f'{bucket_endpoint}/{json_fname}')
     print(r.status_code, "getting file", json_fname)
-    j = json.loads(r.text)
+    try:
+        j = json.loads(r.text)
+    except json.decoder.JSONDecodeError: # no file exists
+        j = []
     status = write_json_file(json_fname, j + contents)
     print(status, "writing search results to json")
 
@@ -98,15 +101,15 @@ def write_search_results(contents, search_engine):
     for term_results in contents:
         term = term_results[f'english_term']
         for url in term_results['urls'][:5]:
-            spaces_fname = f'images/{datestring}/{search_engine}/{term}/{img_count}.jpg'
+            spaces_fname = f'images/{search_engine}/{term}/{datestring}__{img_count}.jpg'
             write_image(url, spaces_fname)
             img_count += 1
     return img_count
 
 def write_error(s):
     file_contents = load_error_file()
-    # new_contents = f'{datetime.datetime.now()} {s}\n' + file_contents
-    new_contents = [{'timestamp':str(datetime.datetime.utcnow()), 'error':s}] + file_contents
+    # new_contents = f'{datetime.now()} {s}\n' + file_contents
+    new_contents = [{'timestamp':str(datetime.utcnow()), 'error':s}] + file_contents
     r = write_json_file('errors.json', new_contents)
     print(r)
 
