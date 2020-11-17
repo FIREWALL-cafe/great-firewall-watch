@@ -7,27 +7,27 @@ class Translator():
         self.endpoint = 'https://babelfish.firewallcafe.com/translate'
         self.target = 'zh-CN'
         with open('config.json') as f:
-            self.secret = json.loads(f.read())['private_key_id']
-        
-    def to_chinese(self, text):
-#         if isinstance(text, six.binary_type):
-#             text = text.decode("utf-8")
-        j = requests.post(self.endpoint,
-            data={'secret':private_key_id, 'query':text, 'langFrom':'en', 'langTo':'zh-CN'}
-        ).json()
+            self.secret = json.loads(f.read())['babelfish_key_id']
+
+    def translate(self, text, langFrom, langTo):
+        r = requests.post(self.endpoint,
+            data={'secret':self.secret, 'query':text, 'langFrom':langFrom, 'langTo':langTo}
+        )
+        print(r.status_code, r.text)
+        try:
+            j = r.json()
+        except: 
+            return ''
         if j['ok'] > 0:
             return j['translated']
         else:
             return ''
 
-    def to_english(self, text, source_language='zh-CN'):
-        j = requests.post(self.endpoint,
-            data={'secret':private_key_id, 'query':text, 'langFrom':'zh-CN', 'langTo':'en'}
-        ).json()
-        if j['ok'] > 0:
-            return j['translated']
-        else:
-            return ''
+    def to_chinese(self, text):
+        return self.translate(text, 'en', 'zh-CN')
+
+    def to_english(self, text):
+        return self.translate(text, 'zh-CN', 'en')
 
 def machine_translate(termlist):
     print("running machine translation on list")
@@ -35,6 +35,7 @@ def machine_translate(termlist):
     for term_idx in range(len(termlist)):
         english_term = termlist[term_idx]['english']
         chinese_term = termlist[term_idx]['chinese']
+        print(english_term, chinese_term)
         if not chinese_term and not english_term:
             continue
         if not chinese_term: 

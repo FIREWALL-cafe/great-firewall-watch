@@ -4,6 +4,7 @@ from boto3.s3.transfer import S3Transfer
 import csv
 from datetime import datetime
 import json
+from pandas import read_excel
 import requests
 from translate import machine_translate
 
@@ -124,7 +125,7 @@ def load_config():
         return json.loads(f.read())
 
 def write_csv(termlist):
-    fname = "termlist.csv"
+    fname = "termlist.xlsx"
     with open(fname, "w", newline="") as csv_file:
         cols = ["english", "chinese"] 
         writer = csv.DictWriter(csv_file, fieldnames=cols)
@@ -140,22 +141,32 @@ def write_csv(termlist):
 def load_termlist():
     config = load_config()
     base_url = f'https://{config["bucket"]}.{config["region"]}.digitaloceanspaces.com/'
-    r = requests.get(base_url + 'termlist.csv')
-    print(r.text)
+    df = read_excel(base_url + 'termlist.xlsx')
     termlist = []
     needs_translation = False
-    for row in csv.DictReader(r.text.split('\n'), delimiter=','):
+    for i,row in df.fillna('').iterrows():
         try:
             english = row['english']
             chinese = row['chinese']
             termlist.append({'english': english, 'chinese': chinese})
         except Exception as e:
             print("could not parse row:", row, e)
-            continue
+            continue        
         if (english and not chinese) or (chinese and not english):
             needs_translation = True
+    # for row in csv.DictReader(r.text.split('\n'), delimiter=','):
+    #     try:
+    #         english = row['english']
+    #         chinese = row['chinese']
+    #         termlist.append({'english': english, 'chinese': chinese})
+    #     except Exception as e:
+    #         print("could not parse row:", row, e)
+    #         continue
+    #     if (english and not chinese) or (chinese and not english):
+    #         needs_translation = True
     if needs_translation:
         termlist = machine_translate(termlist)
-    return termlist
+    # return termlist
+    return []
 
 # print(load_termlist())
