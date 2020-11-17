@@ -5,7 +5,7 @@ import csv
 from datetime import datetime
 import json
 import requests
-from translate import Translator
+from translate import machine_translate
 
 '''
 This is for reporting errors and statistics about the scraping rather than the results of the scraping itself
@@ -119,24 +119,6 @@ def write_logs(s):
 def load_config():
     with open('config.json') as f:
         return json.loads(f.read())
-
-def machine_translate(termlist):
-    print("running machine translation on list")
-    translator = Translator()
-    for term_idx in range(len(termlist)):
-        english_term = termlist[term_idx]['english']
-        chinese_term = termlist[term_idx]['chinese']
-        if not chinese_term and not english_term:
-            continue
-        if not chinese_term: 
-            chinese_term = translator.to_chinese(english_term)
-            termlist[term_idx]['chinese'] = chinese_term
-        if not english_term:
-            english_term = translator.to_english(chinese_term)
-            termlist[term_idx]['english'] = english_term
-
-    write_csv(termlist)
-    return termlist
 
 def write_csv(termlist):
     fname = "termlist.csv"
