@@ -62,7 +62,7 @@ def run(total_hours, hourly_limit=200, shuffle=True):
     if len(termlist) > daily_max_requests:
         print("Warning: termlist length is", len(termlist), "while max daily requests will be", daily_max_requests)
     if len(termlist) > total_requests:
-        print(f"Warning: only querying {total_requests} of {len(termlist)} total terms")
+        print(f"Warning: only querying {total_requests} of {len(termlist)} total terms (not enough time specified)")
     print("querying", total_requests, "terms for", printable_time(seconds=total_time))
 
     term_idx = 0

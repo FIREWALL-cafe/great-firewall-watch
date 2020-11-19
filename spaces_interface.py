@@ -126,14 +126,15 @@ def load_config():
 
 def write_termlist(df):
     fname = "termlist.xlsx"
-    df.to_csv(fname)
+    print("writing to", fname, df)
+    df.to_excel(fname)
 
     # upload the file we just wrote
     transfer.upload_file(fname, j['bucket'], fname)
     # make that file public
     r = client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key=fname)
     print(r)
-    
+
 def load_termlist():
     config = load_config()
     base_url = f'https://{config["bucket"]}.{config["region"]}.digitaloceanspaces.com/'
