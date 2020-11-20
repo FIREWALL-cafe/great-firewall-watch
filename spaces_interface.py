@@ -127,7 +127,7 @@ def load_config():
 def write_termlist(df):
     fname = "termlist.xlsx"
     print("writing to", fname, df)
-    df.to_excel(fname)
+    df.to_excel(fname, index=False)
 
     # upload the file we just wrote
     transfer.upload_file(fname, j['bucket'], fname)
