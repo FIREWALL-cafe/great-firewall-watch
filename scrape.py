@@ -42,7 +42,7 @@ def printable_time(days=0, hours=0, minutes=0, seconds=0):
     remainder = total_seconds % (24*60*60)
     return f"{total_days} days, {printable_time(seconds=remainder)}"
 
-def run(total_hours, hourly_limit=200, shuffle=True):
+def run(total_hours=24, hourly_limit=200, shuffle=True):
     google_fails = []
     baidu_fails = []
 
