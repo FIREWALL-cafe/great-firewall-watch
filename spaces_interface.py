@@ -138,7 +138,8 @@ def write_termlist(df):
 def load_termlist():
     config = load_config()
     base_url = f'https://{config["bucket"]}.{config["region"]}.digitaloceanspaces.com/'
-    df = read_excel(base_url + 'termlist.xlsx')
+    # read the excel file and make sure blank cells are empty strings and not NaNs
+    df = read_excel(base_url + 'termlist.xlsx').fillna('')
     needs_translation = False
     for i,row in df.fillna('').iterrows():
         try:
