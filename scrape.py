@@ -42,7 +42,9 @@ def printable_time(days=0, hours=0, minutes=0, seconds=0):
     remainder = total_seconds % (24*60*60)
     return f"{total_days} days, {printable_time(seconds=remainder)}"
 
-def run(total_hours=24, hourly_limit=200, shuffle=True):
+def run(total_hours=24, hourly_limit=200, shuffle=False):
+
+
     google_fails = []
     baidu_fails = []
 
@@ -56,9 +58,11 @@ def run(total_hours=24, hourly_limit=200, shuffle=True):
 
     termlist = load_termlist()
 
+    # not sure if shuffle is needed, if so try shuffling index
     if shuffle:
-        print("shuffling termlist")
-        random.shuffle(termlist)
+        raise NotImplementedError()
+    #     print("shuffling termlist")
+    #     random.shuffle(termlist)
     if len(termlist) > daily_max_requests:
         print("Warning: termlist length is", len(termlist), "while max daily requests will be", daily_max_requests)
     if len(termlist) > total_requests:
