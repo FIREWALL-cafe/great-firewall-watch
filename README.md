@@ -16,7 +16,7 @@ The two other major dependencies for this project are DigitalOcean Spaces and th
 
 Make sure this is in the crontab:
 
-`@hourly bash ~/great-firewall-watch/job.sh`
+`@daily bash ~/great-firewall-watch/job.sh`
 
 Replace the folder location with wherever the repo is located, and make sure your config file is filled out and the virtual environment is where the code expects it to be.
 
