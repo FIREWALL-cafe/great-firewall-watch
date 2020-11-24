@@ -14,6 +14,12 @@ This was written with Python 3.8 and should be compatible with all versions of P
 
 The two other major dependencies for this project are DigitalOcean Spaces and the Firewall Cafe translation back end, babelfish. For the first, you'll need to set up a config file detailing the Spaces bucket name and region, as well as your DO access key and ID. If you have access to babelfish, you'll need to put the babelfish key ID into the config file. If you don't, you'll need to rewrite translate.py to use another translation service (or just do it manually when you put together your termlist). 
 
+Make sure this is in the crontab:
+
+`@hourly bash ~/great-firewall-watch/job.sh`
+
+Replace the folder location with wherever the repo is located, and make sure your config file is filled out and the virtual environment is where the code expects it to be.
+
 ## Using the scraper
 
 ### Uploading a new list of terms

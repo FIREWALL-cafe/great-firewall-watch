@@ -70,6 +70,8 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
     print("querying", total_requests, "terms for", printable_time(seconds=total_time))
 
     term_idx = 0
+    google_img_count = 0
+    baidu_img_count = 0
 
     start_ts = time.time()
     for i in range(0, total_requests):
@@ -124,12 +126,12 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
             os.mkdir('search_results')
         except Exception as e:
             print("could not make directory", e)
-        google_img_count = write_search_results(google_results, 'google')
-        baidu_img_count = write_search_results(baidu_results, 'baidu')
-        write_logs(f'wrote {google_img_count} google images and {baidu_img_count} baidu images')
-        write_error(f"Baidu failures: {len(baidu_fails)}")
-        write_error(f"Google failures: {len(google_fails)}")
+        google_img_count += write_search_results(google_results, 'google')
+        baidu_img_count += write_search_results(baidu_results, 'baidu')
         time.sleep(max(0, wait_time - took + time_noise))
+    write_logs(f'wrote {google_img_count} google images and {baidu_img_count} baidu images')
+    write_error(f"Baidu failures: {len(baidu_fails)}")
+    write_error(f"Google failures: {len(google_fails)}")
     print("took", printable_time(seconds=time.time() - start_ts))
 
 if __name__ == "__main__":
