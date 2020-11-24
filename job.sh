@@ -1,6 +1,5 @@
 #! /bin/bash
 date
-cd ~
-source environments/firewall/bin/activate
+source ~/great-firewall-watch/venv/bin/activate
 cd great-firewall-watch
 python scrape.py
