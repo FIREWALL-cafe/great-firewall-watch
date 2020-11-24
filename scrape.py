@@ -80,10 +80,12 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
         except:
             print("out of terms")
             break
-        print(f'{i}: "{english_term}", "{chinese_term}"')
+        print(f'request {i}, term idx {term_idx}: "{english_term}", "{chinese_term}"')
+        if not english_term:
+            print("skipping Google for term (English term not present)")
         try:
             urls = query_google(english_term)
-            print(f"\tgoogle got {len(urls)} images")
+            print(f"\tGoogle got {len(urls)} images")
             result = {}
             result['english_term'] = english_term
             result['chinese_term'] = chinese_term
@@ -92,18 +94,21 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
             google_results.append(result)
         except Exception as e:
             google_fails.append(e)
-            print("\tgoogle fail", e)
+            print("\tGoogle fail")
+        if not chinese_term:
+            print("skipping Baidu for term (Chinese term not present)")
         try:
-            urls = query_baidu(english_term)
+            urls = query_baidu(chinese_term)
             print(f"\tbaidu got {len(urls)} images")
             result = {}
             result['english_term'] = english_term
+            result['chinese_term'] = chinese_term
             result['urls'] = urls[:MAX_PICTURES_PER]
             result['ts'] = time.time()
             baidu_results.append(result)
         except Exception as e:
             baidu_fails.append(e)
-            print("\tbaidu fail")
+            print("\tBaidu fail")
 
         term_idx += 1
 
@@ -119,18 +124,13 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
             os.mkdir('search_results')
         except Exception as e:
             print("could not make directory", e)
-        # write_search_results(f'search_results/google_searches_{datestring}.json', google_results)
         google_img_count = write_search_results(google_results, 'google')
-        # write_search_results(f'search_results/baidu_searches_{datestring}.json', baidu_results)
         baidu_img_count = write_search_results(baidu_results, 'baidu')
         write_logs(f'wrote {google_img_count} google images and {baidu_img_count} baidu images')
+        write_error(f"Baidu failures: {len(baidu_fails)}")
+        write_error(f"Google failures: {len(google_fails)}")
         time.sleep(max(0, wait_time - took + time_noise))
     print("took", printable_time(seconds=time.time() - start_ts))
 
 if __name__ == "__main__":
-    # try:
-    # run(.005, shuffle=False)
     run()
-    # except Exception as e:
-    #     print("during run(), an error occurred", e)
-    #     write_error(str(datetime.now()) + ': ' + str(e))
