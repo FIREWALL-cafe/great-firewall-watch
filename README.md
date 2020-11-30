@@ -12,9 +12,15 @@ To install and run, clone the repository and install via pip (preferably in a vi
 
 This was written with Python 3.8 and should be compatible with all versions of Python 3, but hasn't been tested extensively. 
 
-The two other major dependencies for this project are DigitalOcean Spaces and the Firewall Cafe translation back end, babelfish. For the first, you'll need to set up a config file detailing the Spaces bucket name and region, as well as your DO access key and ID. If you have access to babelfish, you'll need to put the babelfish key ID into the config file. If you don't, you'll need to rewrite translate.py to use another translation service (or just do it manually when you put together your termlist). 
+The two other major dependencies for this project are DigitalOcean Spaces and the Firewall Cafe translation back end, babelfish. For the first, you'll need to set up a <u>config.json</u> file detailing the Spaces bucket name and region, as well as your DO access key and ID. If you have access to babelfish, you'll need to put the babelfish key ID into the config file. If you don't, you'll need to rewrite translate.py to use another translation service (or just do it manually when you put together your termlist). You can create a new access key / ID pair by going to Spaces > Manage Keys, then clicking Generate New Key. 
 
-Make sure this is in the crontab:
+To SSH into the Droplet, get the IP address from the DigitalOcean dashboard and run:
+
+`ssh root@<ip address you copied>`
+
+You'll need the password for the Droplet to get access. The current Firewall Droplet has a user with sudo privileges, `firewall`, with the codebase in that user's home directory. You can switch to that user by typing `su firewall` (it's not good practice to do things as root).
+
+If you're deploying a new Droplet, make sure this is in the crontab:
 
 `@daily bash ~/great-firewall-watch/job.sh`
 
