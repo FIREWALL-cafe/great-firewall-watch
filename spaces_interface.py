@@ -25,9 +25,12 @@ client = session.client('s3',
 transfer = S3Transfer(client)
 
 # List all buckets on your account.
-response = client.list_buckets()
-spaces = [space['Name'] for space in response['Buckets']]
-print("Spaces List: %s" % spaces)
+try:
+    response = client.list_buckets()
+    spaces = [space['Name'] for space in response['Buckets']]
+    print("Spaces List: %s" % spaces)
+except Exception as e:
+    print("Could not access Spaces bucket, are your key/ID valid?", str(e))
 
 def load_json_file(fname):
     if '.json' not in fname:
