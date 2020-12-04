@@ -6,6 +6,8 @@ The scraper is designed to be called by a regular cron job, making its way throu
 
 ## Installing and deploying
 
+If you're starting a Digital Ocean Droplet from scratch, create an Ubuntu 20.04 Droplet (ideally with SSH key, but set it to be password-protected if you don't have SSH set up) and then add a sudo user following [this tutorial](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-sudo-enabled-user-on-ubuntu-20-04-quickstart) so you're not doing this as the root account.
+
 To install and run, clone the repository and install via [pip](https://pip.pypa.io/en/stable/installing/) (preferably in a [virtual environment](https://sourabhbajaj.com/mac-setup/Python/virtualenv.html)):
 
 `pip install -r requirements.txt`
