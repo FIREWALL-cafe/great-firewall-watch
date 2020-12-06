@@ -103,7 +103,7 @@ def write_search_results(contents, search_engine):
 
     img_count = 0
     for term_results in contents:
-        term = term_results[f'english_term']
+        term = term_results['english_term'] + '_' + term_results['chinese_term']
         for url in term_results['urls'][:5]:
             spaces_fname = f'images/{search_engine}/{term}/{datestring}__{img_count}.jpg'
             write_image(url, spaces_fname)
@@ -112,7 +112,6 @@ def write_search_results(contents, search_engine):
 
 def write_error(s):
     file_contents = load_error_file()
-    # new_contents = f'{datetime.now()} {s}\n' + file_contents
     new_contents = [{'timestamp':str(datetime.utcnow()), 'error':s}] + file_contents
     r = write_json_file('errors.json', new_contents)
     print(r)
