@@ -58,6 +58,13 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
 
     termlist = load_termlist()
 
+    try:
+        import os
+        os.mkdir('search_results')
+    except Exception as e:
+        print("could not make directory", e)
+        # pass
+
     # not sure if shuffle is needed, if so try shuffling index
     if shuffle:
         raise NotImplementedError()
@@ -84,33 +91,35 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
             break
         print(f'request {i}, term idx {term_idx}: "{english_term}", "{chinese_term}"')
         if not english_term:
-            print("skipping Google for term (English term not present)")
-        try:
-            urls = query_google(english_term)
-            print(f"\tGoogle got {len(urls)} images")
-            result = {}
-            result['english_term'] = english_term
-            result['chinese_term'] = chinese_term
-            result['urls'] = urls[:MAX_PICTURES_PER]
-            result['ts'] = time.time()
-            google_results.append(result)
-        except Exception as e:
-            google_fails.append(e)
-            print("\tGoogle fail")
+            print("\tskipping Google for term (English term not present)")
+        else:
+            try:
+                urls = query_google(english_term)
+                print(f"\tGoogle got {len(urls)} images")
+                result = {}
+                result['english_term'] = english_term
+                result['chinese_term'] = chinese_term
+                result['urls'] = urls[:MAX_PICTURES_PER]
+                result['ts'] = time.time()
+                google_results.append(result)
+            except Exception as e:
+                google_fails.append(e)
+                print("\tGoogle fail")
         if not chinese_term:
-            print("skipping Baidu for term (Chinese term not present)")
-        try:
-            urls = query_baidu(chinese_term)
-            print(f"\tbaidu got {len(urls)} images")
-            result = {}
-            result['english_term'] = english_term
-            result['chinese_term'] = chinese_term
-            result['urls'] = urls[:MAX_PICTURES_PER]
-            result['ts'] = time.time()
-            baidu_results.append(result)
-        except Exception as e:
-            baidu_fails.append(e)
-            print("\tBaidu fail")
+            print("\tskipping Baidu for term (Chinese term not present)")
+        else:
+            try:
+                urls = query_baidu(chinese_term)
+                print(f"\tbaidu got {len(urls)} images")
+                result = {}
+                result['english_term'] = english_term
+                result['chinese_term'] = chinese_term
+                result['urls'] = urls[:MAX_PICTURES_PER]
+                result['ts'] = time.time()
+                baidu_results.append(result)
+            except Exception as e:
+                baidu_fails.append(e)
+                print("\tBaidu fail")
 
         term_idx += 1
 
@@ -121,11 +130,6 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
         # print("adding noise to wait time", printable_time(seconds=time_noise))
 
         # cache results. this is a backup and not meant to be a reliable data store
-        try:
-            import os
-            os.mkdir('search_results')
-        except Exception as e:
-            print("could not make directory", e)
         google_img_count += write_search_results(google_results, 'google')
         baidu_img_count += write_search_results(baidu_results, 'baidu')
         time.sleep(max(0, wait_time - took + time_noise))

@@ -10,8 +10,11 @@ class Translator():
         self.target = 'zh-CN'
         with open('config.json') as f:
             self.secret = json.loads(f.read())['babelfish_key_id']
+        print("TEST REMOVE ME: skipping translation")
 
     def translate(self, text, langFrom, langTo):
+        return ''
+
         r = requests.post(self.endpoint,
             data={'secret':self.secret, 'query':text, 'langFrom':langFrom, 'langTo':langTo}
         )

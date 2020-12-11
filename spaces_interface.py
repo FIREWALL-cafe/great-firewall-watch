@@ -58,7 +58,7 @@ def _write_public(fname, new_fname=None):
     # if new_fname isn't specified, then just use fname as the name we're uploading
     if not new_fname:
         new_fname = fname
-    print('uploading', fname, 'to', new_fname)
+    # print('uploading', fname, 'to', new_fname)
 
     # upload the file we just wrote
     transfer.upload_file(fname, j['bucket'], new_fname)
@@ -66,13 +66,13 @@ def _write_public(fname, new_fname=None):
     r = client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key=new_fname)
     return r['ResponseMetadata']['HTTPStatusCode']
 
-def write_image(url, spaces_fname):
+def request_and_write_image(url, spaces_fname):
     try:
         r = requests.get(url, stream=True)
     except Exception as e:
-        print(url, e)
+        # print(url, e)
         return
-    print(r.status_code, "getting image", url)
+    # print(r.status_code, "getting image", url)
     if not r.ok:
         return
     # write locally
@@ -93,20 +93,20 @@ def write_search_results(contents, search_engine):
     datestring = str(datetime.utcnow().date())
     json_fname = f'search_results/{search_engine}_searches_{datestring}.json'
     r = requests.get(f'{bucket_endpoint}/{json_fname}')
-    print(r.status_code, "getting file", json_fname)
+    # print(r.status_code, "getting file", json_fname)
     try:
         j = json.loads(r.text)
     except json.decoder.JSONDecodeError: # no file exists
         j = []
     status = write_json_file(json_fname, j + contents)
-    print(status, "writing search results to json")
+    # print("TEST REMOVE ME: not writing images or search results")
 
     img_count = 0
     for term_results in contents:
         term = term_results['english_term'] + '_' + term_results['chinese_term']
         for url in term_results['urls'][:5]:
             spaces_fname = f'images/{search_engine}/{term}/{datestring}__{img_count}.jpg'
-            write_image(url, spaces_fname)
+            request_and_write_image(url, spaces_fname)
             img_count += 1
     return img_count
 
@@ -120,7 +120,10 @@ def write_logs(s):
     file_contents = load_json_file('log.json')
     new_contents = [{'timestamp':str(datetime.utcnow()), 'log':s}] + file_contents
     r = write_json_file('log.json', new_contents)
-    print(r)
+    if r.ok:
+        print('wrote to log:', s)
+    else:
+        print('failed to write to log:', s)
 
 def load_config():
     with open('config.json') as f:
