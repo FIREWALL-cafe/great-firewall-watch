@@ -52,7 +52,7 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
     termlist = load_termlist()
 
     total_requests = min(int(total_hours * hourly_limit), len(termlist))
-    total_time = min(60*60*total_hours, len(termlist)/hourly_limit)
+    total_time = 60*60*min(total_hours, len(termlist)/hourly_limit)
     wait_time = total_time / total_requests
     daily_max_requests = hourly_limit * 24
 
