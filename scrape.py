@@ -11,7 +11,7 @@ import re
 import requests
 import time
 
-MAX_PICTURES_PER = 10
+MAX_PICTURES_PER = 5
 
 def query_baidu(term):
     baidu_template = 'https://image.baidu.com/search/index?tn=baiduimage&word={}'
@@ -139,4 +139,8 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
     print("took", printable_time(seconds=time.time() - start_ts))
 
 if __name__ == "__main__":
-    run()
+    try:
+        run()
+    except Exception as e:
+        write_error(str(e))
+        write_logs("got an error while running scraper")
