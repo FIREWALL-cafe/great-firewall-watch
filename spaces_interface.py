@@ -70,9 +70,9 @@ def request_and_write_image(url, spaces_fname):
     try:
         r = requests.get(url, stream=True)
     except Exception as e:
-        # print(url, e)
+        print(url, e)
         return
-    # print(r.status_code, "getting image", url)
+    print(r.status_code, "getting image", url)
     if not r.ok:
         return
     # write locally
@@ -93,7 +93,7 @@ def write_search_results(contents, search_engine):
     datestring = str(datetime.utcnow().date())
     json_fname = f'search_results/{search_engine}_searches_{datestring}.json'
     r = requests.get(f'{bucket_endpoint}/{json_fname}')
-    # print(r.status_code, "getting file", json_fname)
+    print(r.status_code, "getting file", json_fname)
     try:
         j = json.loads(r.text)
     except json.decoder.JSONDecodeError: # no file exists
@@ -116,7 +116,7 @@ def write_error(s, verbose=False):
     status_code = write_json_file('errors.json', new_contents)
     if verbose:
         print("got error:", s)
-        print("writing to file:", r.status_code)
+        print("writing to file:", status_code)
 
 def write_logs(s, verbose=False):
     if verbose:
@@ -163,5 +163,3 @@ def load_termlist():
     if needs_translation:
         df = machine_translate(df)
     return df
-
-# print(load_termlist())

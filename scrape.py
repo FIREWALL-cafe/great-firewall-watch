@@ -43,12 +43,6 @@ def printable_time(days=0, hours=0, minutes=0, seconds=0):
     return f"{total_days} days, {printable_time(seconds=remainder)}"
 
 def run(total_hours=24, hourly_limit=200, shuffle=False):
-    google_fails = []
-    baidu_fails = []
-
-    google_results = []
-    baidu_results = []
-
     termlist = load_termlist()
 
     total_requests = min(int(total_hours * hourly_limit), len(termlist))
@@ -80,6 +74,11 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
 
     start_ts = time.time()
     for i in range(0, total_requests):
+        google_fails = []
+        baidu_fails = []
+
+        google_results = []
+        baidu_results = []
         start_iter_ts = time.time()
         try:
             english_term = termlist.loc[term_idx].english
@@ -137,8 +136,10 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
     print("took", printable_time(seconds=time.time() - start_ts))
 
 if __name__ == "__main__":
-    try:
-        run()
-    except Exception as e:
-        write_error(str(e))
-        write_logs("got an error while running scraper", verbose=True)
+    # try:
+    #     run()
+    # except Exception as e:
+    #     write_logs("got an error while running scraper", verbose=True)
+    #     write_error(str(e), verbose=True)
+
+    run()
