@@ -43,20 +43,18 @@ def printable_time(days=0, hours=0, minutes=0, seconds=0):
     return f"{total_days} days, {printable_time(seconds=remainder)}"
 
 def run(total_hours=24, hourly_limit=200, shuffle=False):
-
-
     google_fails = []
     baidu_fails = []
 
     google_results = []
     baidu_results = []
 
-    total_requests = int(total_hours * hourly_limit)
+    termlist = load_termlist()
+
+    total_requests = min(int(total_hours * hourly_limit), len(termlist))
     total_time = 60*60*total_hours
     wait_time = total_time / total_requests
     daily_max_requests = hourly_limit * 24
-
-    termlist = load_termlist()
 
     try:
         import os
