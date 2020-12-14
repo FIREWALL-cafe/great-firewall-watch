@@ -74,8 +74,8 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
         print("Warning: termlist length is", len(termlist), "while max daily requests will be", daily_max_requests)
     if len(termlist) > total_requests:
         print(f"Warning: only querying {total_requests} of {len(termlist)} total terms (not enough time specified)")
-    print("querying", total_requests, "terms for", printable_time(seconds=total_time))
-
+    write_logs(f"querying {total_requests} terms for {printable_time(seconds=total_time)}", verbose=True)
+    
     term_idx = 0
     google_img_count = 0
     baidu_img_count = 0
@@ -143,4 +143,4 @@ if __name__ == "__main__":
         run()
     except Exception as e:
         write_error(str(e))
-        write_logs("got an error while running scraper")
+        write_logs("got an error while running scraper", verbose=True)

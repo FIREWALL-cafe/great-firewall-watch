@@ -110,20 +110,25 @@ def write_search_results(contents, search_engine):
             img_count += 1
     return img_count
 
-def write_error(s):
+def write_error(s, verbose=False):
     file_contents = load_error_file()
     new_contents = [{'timestamp':str(datetime.utcnow()), 'error':s}] + file_contents
-    r = write_json_file('errors.json', new_contents)
-    print(r)
+    status_code = write_json_file('errors.json', new_contents)
+    if verbose:
+        print("got error:", s)
+        print("writing to file:", r.status_code)
 
-def write_logs(s):
+def write_logs(s, verbose=False):
+    if verbose:
+        print(s)
     file_contents = load_json_file('log.json')
     new_contents = [{'timestamp':str(datetime.utcnow()), 'log':s}] + file_contents
-    r = write_json_file('log.json', new_contents)
-    if r.ok:
-        print('wrote to log:', s)
-    else:
-        print('failed to write to log:', s)
+    status_code = write_json_file('log.json', new_contents)
+    if verbose:
+        if status_code < 300:
+            print('wrote to log:', s)
+        else:
+            print('failed to write to log:', s)
 
 def load_config():
     with open('config.json') as f:
