@@ -42,7 +42,7 @@ def printable_time(days=0, hours=0, minutes=0, seconds=0):
     remainder = total_seconds % (24*60*60)
     return f"{total_days} days, {printable_time(seconds=remainder)}"
 
-def run(total_hours=24, hourly_limit=200, shuffle=False):
+def run(total_hours=24, hourly_limit=300, shuffle=False):
     termlist = load_termlist()
 
     total_requests = min(int(total_hours * hourly_limit), len(termlist))
@@ -71,14 +71,14 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
     term_idx = 0
     google_img_count = 0
     baidu_img_count = 0
+    google_fails = []
+    baidu_fails = []
+    google_results = []
+    baidu_results = []
 
     start_ts = time.time()
     for i in range(0, total_requests):
-        google_fails = []
-        baidu_fails = []
 
-        google_results = []
-        baidu_results = []
         start_iter_ts = time.time()
         try:
             english_term = termlist.loc[term_idx].english
@@ -117,7 +117,7 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
             except Exception as e:
                 baidu_fails.append(e)
                 print("\tBaidu fail")
-
+        print("done querying search engines for term", english_term)
         term_idx += 1
 
         # account for the time the calls took
@@ -127,19 +127,29 @@ def run(total_hours=24, hourly_limit=200, shuffle=False):
         # print("adding noise to wait time", printable_time(seconds=time_noise))
 
         # cache results. this is a backup and not meant to be a reliable data store
-        google_img_count += write_search_results(google_results, 'google')
-        baidu_img_count += write_search_results(baidu_results, 'baidu')
+        if i % 25 == 0:
+            try:
+                google_img_count += write_search_results(google_results, 'google')
+                baidu_img_count += write_search_results(baidu_results, 'baidu')
+                google_results = []
+                baidu_results = []
+            except Exception as e:
+                print("failed to write search results; waiting until next attempt")
         time.sleep(max(0, wait_time - took + time_noise))
+
+    google_img_count += write_search_results(google_results, 'google')
+    baidu_img_count += write_search_results(baidu_results, 'baidu')
+    google_results = []
+    baidu_results = []
+
     write_logs(f'wrote {google_img_count} google images and {baidu_img_count} baidu images')
     write_error(f"Baidu failures: {len(baidu_fails)}")
     write_error(f"Google failures: {len(google_fails)}")
     print("took", printable_time(seconds=time.time() - start_ts))
 
 if __name__ == "__main__":
-    # try:
-    #     run()
-    # except Exception as e:
-    #     write_logs("got an error while running scraper", verbose=True)
-    #     write_error(str(e), verbose=True)
-
-    run()
+    try:
+        run()
+    except Exception as e:
+        write_logs("got an error while running scraper", verbose=True)
+        write_error(str(e), verbose=True)

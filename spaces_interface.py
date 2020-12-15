@@ -46,10 +46,10 @@ def load_error_file(suffix=''):
     else:
         r = requests.get(f'{bucket_endpoint}/errors.json')
     if r.status_code == 200:
-        print("found the file")
+        # print("found the file")
         return r.json()
     else:
-        print("did not find the file", r)
+        # print("did not find the error file", r)
         return []
 
 def _write_public(fname, new_fname=None):
@@ -92,19 +92,20 @@ def write_json_file(fname, contents):
 def write_search_results(contents, search_engine):
     datestring = str(datetime.utcnow().date())
     json_fname = f'search_results/{search_engine}_searches_{datestring}.json'
-    r = requests.get(f'{bucket_endpoint}/{json_fname}')
-    print(r.status_code, "getting file", json_fname)
     try:
+        # print("getting file", json_fname)
+        r = requests.get(f'{bucket_endpoint}/{json_fname}')
+        # print(r.status_code, "getting file", json_fname)
         j = json.loads(r.text)
     except json.decoder.JSONDecodeError: # no file exists
         j = []
+    
     status = write_json_file(json_fname, j + contents)
-    # print("TEST REMOVE ME: not writing images or search results")
 
     img_count = 0
     for term_results in contents:
         term = term_results['english_term'] + '_' + term_results['chinese_term']
-        for url in term_results['urls'][:5]:
+        for url in term_results['urls']:
             spaces_fname = f'images/{search_engine}/{term}/{datestring}__{img_count}.jpg'
             request_and_write_image(url, spaces_fname)
             img_count += 1
