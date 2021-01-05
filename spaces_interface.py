@@ -141,39 +141,49 @@ def load_config():
 
 def write_termlist(df):
     fname = "termlist.xlsx"
-    print("writing to", fname, df)
+    print(f"writing to {fname}\n", df.info())
     df.to_excel(fname, index=False)
 
     # upload the file we just wrote
     transfer.upload_file(fname, j['bucket'], fname)
     # make that file public
     r = client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key=fname)
-    print(r)
+    print("result:", r['ResponseMetadata']['HTTPStatusCode'])
+
+def create_link_columns(df):
+    '''
+    Use the "english" and "chinese" columns in the termlist to create links to the digitalocean folders 
+    with image results for the given terms
+    '''
+    def formatted_link(row, search_engine):
+        # print("row:", row)
+        if not row['english'] or not row['chinese']:
+            return ''
+        spaces_endpoint = f"https://cloud.digitalocean.com/spaces/{j['bucket']}?path="
+        folder_name = f"images/{search_engine}/{combined_term(row['english'], row['chinese'])}"
+        return spaces_endpoint + parse.quote_plus(folder_name)
+    df['link_google'] = df.apply(lambda row: formatted_link(row, 'google'), axis='columns')
+    df['link_baidu'] = df.apply(lambda row: formatted_link(row, 'baidu'), axis='columns')
+    return df
 
 def load_termlist():
     config = load_config()
     base_url = f'https://{config["bucket"]}.{config["region"]}.digitaloceanspaces.com/'
     # read the excel file and make sure blank cells are empty strings and not NaNs
     df = read_excel(base_url + 'termlist.xlsx').fillna('')
-    df['link_google'] = ''
-    df['link_baidu'] = ''
+
     needs_translation = False
     for i,row in df.fillna('').iterrows():
         try:
             english = row['english']
             chinese = row['chinese']
         except Exception as e:
-            print("could not parse row:", row, e)
+            print('*'*20, "could not parse row:", row, e)
             continue        
         if (english and not chinese) or (chinese and not english):
             needs_translation = True
-        else:
-            spaces_endpoint = f"https://cloud.digitalocean.com/spaces/{j['bucket']}?path="
-            folder_name = f"images/google/{combined_term(english, chinese)}"
-            df['link_google'].iat[i] = spaces_endpoint + parse.quote_plus(folder_name)
-            folder_name = f"images/baidu/{combined_term(english, chinese)}"
-            df['link_baidu'].iat[i] = spaces_endpoint + parse.quote_plus(folder_name)
-            print(folder_name)
     if needs_translation:
         df = machine_translate(df)
+    df = create_link_columns(df)
+    write_termlist(df)
     return df
