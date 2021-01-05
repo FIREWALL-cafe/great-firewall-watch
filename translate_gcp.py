@@ -26,7 +26,8 @@ def machine_translate(df):
     for i,row in df.iterrows():
         english_term = row.english
         chinese_term = row.chinese
-        print(english_term, chinese_term)
+        # print(english_term, chinese_term)
+        print(f'{i} of {len(df)}', end='\r')
         if not chinese_term and not english_term:
             continue
         if not chinese_term: 
@@ -36,5 +37,4 @@ def machine_translate(df):
             english_term = translator.to_english(chinese_term)
             df.at[i, 'english'] = english_term
 
-    spaces_interface.write_termlist(df)
     return df
