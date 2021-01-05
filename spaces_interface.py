@@ -6,7 +6,7 @@ from datetime import datetime
 import json
 from pandas import read_excel
 import requests
-from translate import machine_translate
+from translate_gcp import machine_translate
 
 '''
 This is for reporting errors and statistics about the scraping rather than the results of the scraping itself

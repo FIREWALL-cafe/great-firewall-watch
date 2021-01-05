@@ -6,7 +6,7 @@ class Translator():
     def __init__(self):
         self.client = translate.Client()
         self.target = 'zh-CN'
-        
+
     def to_chinese(self, text, source_language='en'):
 #         if isinstance(text, six.binary_type):
 #             text = text.decode("utf-8")
