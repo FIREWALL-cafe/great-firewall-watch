@@ -6,7 +6,7 @@ from datetime import datetime
 import json
 from pandas import read_excel
 import requests
-from translate import machine_translate
+from translate_gcp import machine_translate
 from urllib import parse
 
 '''

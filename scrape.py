@@ -78,7 +78,6 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
 
     start_ts = time.time()
     for i in range(0, total_requests):
-
         start_iter_ts = time.time()
         try:
             english_term = termlist.loc[term_idx].english
