@@ -148,8 +148,8 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
     print("took", printable_time(seconds=time.time() - start_ts))
 
 if __name__ == "__main__":
-    try:
-        run()
-    except Exception as e:
-        write_logs("got an error while running scraper", verbose=True)
-        write_error(str(e), verbose=True)
+    # try:
+        run(.01)
+    # except Exception as e:
+    #     write_logs("got an error while running scraper", verbose=True)
+    #     write_error(str(e), verbose=True)

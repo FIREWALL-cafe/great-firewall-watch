@@ -7,6 +7,7 @@ import json
 from pandas import read_excel
 import requests
 from translate import machine_translate
+from urllib import parse
 
 '''
 This is for reporting errors and statistics about the scraping rather than the results of the scraping itself
@@ -31,6 +32,9 @@ try:
     print("Spaces List: %s" % spaces)
 except Exception as e:
     print("Could not access Spaces bucket, are your key/ID valid?", str(e))
+
+def combined_term(english, chinese):
+    return f'{english}_{chinese}'
 
 def load_json_file(fname):
     if '.json' not in fname:
@@ -104,7 +108,7 @@ def write_search_results(contents, search_engine):
 
     img_count = 0
     for term_results in contents:
-        term = term_results['english_term'] + '_' + term_results['chinese_term']
+        term = combined_term(term_results['english_term'], term_results['chinese_term'])
         for url in term_results['urls']:
             spaces_fname = f'images/{search_engine}/{term}/{datestring}__{img_count}.jpg'
             request_and_write_image(url, spaces_fname)
@@ -151,6 +155,8 @@ def load_termlist():
     base_url = f'https://{config["bucket"]}.{config["region"]}.digitaloceanspaces.com/'
     # read the excel file and make sure blank cells are empty strings and not NaNs
     df = read_excel(base_url + 'termlist.xlsx').fillna('')
+    df['link_google'] = ''
+    df['link_baidu'] = ''
     needs_translation = False
     for i,row in df.fillna('').iterrows():
         try:
@@ -161,6 +167,13 @@ def load_termlist():
             continue        
         if (english and not chinese) or (chinese and not english):
             needs_translation = True
+        else:
+            spaces_endpoint = f"https://cloud.digitalocean.com/spaces/{j['bucket']}?path="
+            folder_name = f"images/google/{combined_term(english, chinese)}"
+            df['link_google'].iat[i] = spaces_endpoint + parse.quote_plus(folder_name)
+            folder_name = f"images/baidu/{combined_term(english, chinese)}"
+            df['link_baidu'].iat[i] = spaces_endpoint + parse.quote_plus(folder_name)
+            print(folder_name)
     if needs_translation:
         df = machine_translate(df)
     return df
