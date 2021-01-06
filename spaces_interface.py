@@ -162,7 +162,8 @@ def create_link_columns(df):
         spaces_endpoint = f"https://cloud.digitalocean.com/spaces/{j['bucket']}?path="
         folder_name = f"images/{search_engine}/{combined_term(row['english'], row['chinese'])}"
         # link format: '=HYPERLINK(\"\"; \"{3}\")'
-        return f'=HYPERLINK("{spaces_endpoint + parse.quote_plus(folder_name)}", "{folder_name}")'
+        # return f'=HYPERLINK("{spaces_endpoint + parse.quote_plus(folder_name)}", "{folder_name}")'
+        return spaces_endpoint + parse.quote_plus(folder_name)
     df['link_google'] = df.apply(lambda row: formatted_link(row, 'google'), axis='columns')
     df['link_baidu'] = df.apply(lambda row: formatted_link(row, 'baidu'), axis='columns')
     return df
