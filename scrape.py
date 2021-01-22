@@ -130,6 +130,8 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
             try:
                 google_img_count += write_search_results(google_results, 'google')
                 baidu_img_count += write_search_results(baidu_results, 'baidu')
+                save_search_results(google_results, "google")
+                save_search_results(baidu_results, "baidu")
                 google_results = []
                 baidu_results = []
             except Exception as e:
