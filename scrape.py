@@ -11,7 +11,7 @@ import re
 import requests
 import time
 
-MAX_PICTURES_PER = 2
+MAX_PICTURES_PER = 5
 
 def query_baidu(term):
     baidu_template = 'https://image.baidu.com/search/index?tn=baiduimage&word={}'
@@ -128,15 +128,16 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
         # cache results. this is a backup and not meant to be a reliable data store
         if i % 25 == 0:
             try:
-                google_img_count += write_search_results(google_results, 'google')
-                baidu_img_count += write_search_results(baidu_results, 'baidu')
-                save_search_results(google_results, "google")
-                save_search_results(baidu_results, "baidu")
+                count, google_urls = write_search_results(google_results, 'google')
+                google_img_count += count
+                count, baidu_urls = write_search_results(baidu_results, 'baidu')
+                baidu_img_count += count
+                save_search_results(google_results, "google", google_urls)
+                save_search_results(baidu_results, "baidu", baidu_urls)
                 google_results = []
                 baidu_results = []
             except Exception as e:
                 print("failed to write search results; waiting until next attempt:", e)
-        break
         time.sleep(max(0, wait_time - took + time_noise))
 
     google_img_count += write_search_results(google_results, 'google')

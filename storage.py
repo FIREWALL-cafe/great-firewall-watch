@@ -48,15 +48,17 @@ def post_search(search, ip_address=None):
 
 def post_images(search_id, search_engine, urls):
     print("posting images associated with search ID", search_id)
-    r = requests.post(BASE_URL + '/saveImages', data={
+    body = {
         "search_id": search_id,
         "image_search_engine": search_engine,
         "urls": urls,
         "image_ranks": [i+1 for i,_ in enumerate(urls)]
-    })
-    print("result:", r.status_code, r.text)
+    }
+    print(body)
+    r = requests.post(BASE_URL + '/saveImages', data=body)
+    print("result:", r.status_code)
 
-def save_search_results(results, search_engine):
+def save_search_results(results, search_engine, url_list=None):
     for result in results:
         print("result", result)
         search = post_search(result, '192.168.0.1')
@@ -64,7 +66,8 @@ def save_search_results(results, search_engine):
         print("search", search)
         if 'name' in search and search['name'] == 'error':
             print("could not POST search", result['english_term'])
-        post_images(search["search_id"], search_engine, result['urls'])
+        post_images(search["search_id"], search_engine, url_list if url_list is not None else result['urls'])
 
 if __name__ == "__main__":
-    save_search_results([{'english_term':'bunny', 'chinese_term':'', 'ts':1234545, }])
+    import time
+    save_search_results([{'english_term':'bunny', 'chinese_term':'', 'ts':time.time() }], url_list=['google.com', 'baidu.com'])

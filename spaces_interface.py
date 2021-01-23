@@ -3,8 +3,12 @@ from botocore.client import Config
 from boto3.s3.transfer import S3Transfer
 import csv
 from datetime import datetime
+import hashlib
+import imagehash
+import imghdr
 import json
 from pandas import read_excel
+from PIL import Image
 import requests
 from translate_gcp import machine_translate
 from urllib import parse
@@ -32,6 +36,16 @@ try:
     print("Spaces List: %s" % spaces)
 except Exception as e:
     print("Could not access Spaces bucket, are your key/ID valid?", str(e))
+
+def hash_image(fname):
+    return imagehash.phash(Image.open(fname))
+
+def image_fname(fname):
+    hashed = hash_image(fname)
+    ext = imghdr.what(fname)
+    if ext == 'jpeg':
+        ext = 'jpg'
+    return f'{hashed}.{ext}'
 
 def combined_term(english, chinese):
     return f'{english}_{chinese}'
@@ -70,7 +84,7 @@ def _write_public(fname, new_fname=None):
     r = client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key=new_fname)
     return r['ResponseMetadata']['HTTPStatusCode']
 
-def request_and_write_image(url, spaces_fname):
+def request_and_write_image(url):
     try:
         r = requests.get(url, stream=True)
     except Exception as e:
@@ -85,7 +99,10 @@ def request_and_write_image(url, spaces_fname):
             if not block:
                 break
             f.write(block)
-    return _write_public('temp', spaces_fname)
+    spaces_fname = image_fname('temp')
+    status = _write_public('temp', spaces_fname)
+    if status < 400:
+        return spaces_fname
 
 def write_json_file(fname, contents):
     # write a file to upload
@@ -107,13 +124,16 @@ def write_search_results(contents, search_engine):
     status = write_json_file(json_fname, j + contents)
 
     img_count = 0
+    urls = []
     for term_results in contents:
         term = combined_term(term_results['english_term'], term_results['chinese_term'])
         for url in term_results['urls']:
-            spaces_fname = f'images/{search_engine}/{term}/{datestring}__{img_count}.jpg'
-            request_and_write_image(url, spaces_fname)
-            img_count += 1
-    return img_count
+            spaces_folder = 'images/hashed'
+            fname = request_and_write_image(url, spaces_folder)
+            if fname:
+                img_count += 1
+                urls.append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
+    return img_count,urls
 
 def write_error(s, verbose=False):
     file_contents = load_error_file()
