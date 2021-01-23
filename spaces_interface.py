@@ -58,6 +58,12 @@ def load_json_file(fname):
         return []
     return r.json()
 
+def load_text_file(fname):
+    r = requests.get(f'{bucket_endpoint}/{fname}')
+    if not r.status_code == 200:
+        return ""
+    return r.text
+
 def load_error_file(suffix=''):
     if suffix:
         r = requests.get(f'{bucket_endpoint}/errors_{suffix}.json')
@@ -84,7 +90,7 @@ def _write_public(fname, new_fname=None):
     r = client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key=new_fname)
     return r['ResponseMetadata']['HTTPStatusCode']
 
-def request_and_write_image(url):
+def request_and_write_image(url, spaces_folder):
     try:
         r = requests.get(url, stream=True)
     except Exception as e:
@@ -100,7 +106,7 @@ def request_and_write_image(url):
                 break
             f.write(block)
     spaces_fname = image_fname('temp')
-    status = _write_public('temp', spaces_fname)
+    status = _write_public('temp', f'{spaces_folder}/{spaces_fname}')
     if status < 400:
         return spaces_fname
 
@@ -108,6 +114,11 @@ def write_json_file(fname, contents):
     # write a file to upload
     with open(fname, 'w') as f:
         f.write(json.dumps(contents))
+    return _write_public(fname)
+
+def write_text_file(fname, contents):
+    with open(fname, 'w') as f:
+        f.write(contents)
     return _write_public(fname)
 
 def write_search_results(contents, search_engine):
@@ -155,6 +166,19 @@ def write_logs(s, verbose=False):
         else:
             print('failed to write to log:', s)
 
+def write_job_log(s, verbose=False):
+    if verbose:
+        print(s)
+    file_contents = load_text_file('jobs.txt')
+    new_contents = f'[{datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")} UTC] {s}\n{file_contents}'
+    status_code = write_text_file('jobs.txt', new_contents)
+    
+    if verbose:
+        if status_code < 300:
+            print('wrote to log:', s)
+        else:
+            print('failed to write to log:', s)
+
 def load_config():
     with open('config.json') as f:
         return json.loads(f.read())
@@ -192,7 +216,10 @@ def load_termlist():
     config = load_config()
     base_url = f'https://{config["bucket"]}.{config["region"]}.digitaloceanspaces.com/'
     # read the excel file and make sure blank cells are empty strings and not NaNs
-    df = read_excel(base_url + 'termlist.xlsx').fillna('')
+    try:
+        df = read_excel(base_url + 'termlist.xlsx').fillna('')
+    except:
+        raise Exception("failed to load termlist at " + base_url + 'termlist.xlsx')
 
     needs_translation = False
     for i,row in df.fillna('').iterrows():

@@ -1,4 +1,4 @@
-from spaces_interface import load_termlist, write_error, write_search_results, write_logs
+from spaces_interface import load_termlist, write_error, write_search_results, write_logs, write_job_log
 from storage import save_search_results
 from user_agent import get_user_agent
 
@@ -139,9 +139,14 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
             except Exception as e:
                 print("failed to write search results; waiting until next attempt:", e)
         time.sleep(max(0, wait_time - took + time_noise))
+        break
 
-    google_img_count += write_search_results(google_results, 'google')
-    baidu_img_count += write_search_results(baidu_results, 'baidu')
+    count, google_urls = write_search_results(google_results, 'google')
+    google_img_count += count
+    count, baidu_urls = write_search_results(baidu_results, 'baidu')
+    baidu_img_count += count
+    save_search_results(google_results, "google", google_urls)
+    save_search_results(baidu_results, "baidu", baidu_urls)
     google_results = []
     baidu_results = []
 
@@ -149,10 +154,22 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
     write_error(f"Baidu failures: {len(baidu_fails)}")
     write_error(f"Google failures: {len(google_fails)}")
     print("took", printable_time(seconds=time.time() - start_ts))
+    return (google_img_count, baidu_img_count, total_requests)
 
 if __name__ == "__main__":
+    import traceback
+    import time
+    ts = time.time()
+    error = False
     try:
-        run()
+        google_img_count, baidu_img_count, total_requests = run()
     except Exception as e:
-        write_logs("got an error while running scraper", verbose=True)
-        write_error(str(e), verbose=True)
+        exc = traceback.format_exc()
+        error = True
+        print(str(exc))
+        write_logs("got an error while running scraper:" + str(e) + " (see error log for details)", verbose=True)
+        write_error(exc, verbose=True)
+    if not error:
+        write_job_log(f'made {total_requests} requests and collected a total of {google_img_count + baidu_img_count} images over {printable_time(seconds=time.time()-ts)}', verbose=True)
+    else:
+        write_job_log(f'failed to finish with error {str(e)} (details in errors.json), run terminated after {printable_time(seconds=time.time()-ts)}')
