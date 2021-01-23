@@ -25,24 +25,24 @@ def post_search(search, ip_address=None):
     r = requests.post(BASE_URL + '/createSearch', data={
         'search_timestamp': int(1000*search['ts']),
         # location of instance this is deployed on
-        'search_location': 'new_york_city',
+        'search_location': 'automated_scraper',
         # not sure there is a reliable way to get the IP address without hardcoding it, and that won't be great if we're using a proxy
         'search_ip_address': ip_address,
-        'search_client_name':'rowan_scraper_tests',
+        'search_client_name':'automated_scraper',
 
         # what do these two terms mean?
-        'search_engine_initial':'test',
-        'search_engine_translation':'test',
+        'search_engine_initial': None,
+        'search_engine_translation': None,
 
         'search_term_initial':search['english_term'],
         'search_term_initial_language_code':'EN',
-        'search_term_initial_language_confidence':0,
-        'search_term_initial_language_alternate_code':'test',
+        'search_term_initial_language_confidence':1.0,
+        'search_term_initial_language_alternate_code': None,
         'search_term_translation':search['chinese_term'],
-        'search_term_translation_language_code':'test',
-        'search_term_status_banned':False,
-        'search_term_status_sensitive':False,
-        'search_schema_initial':'test'
+        'search_term_translation_language_code':'zh-CN',
+        'search_term_status_banned': False,
+        'search_term_status_sensitive': False,
+        'search_schema_initial': None
     })
     return r.json()[0]
 
