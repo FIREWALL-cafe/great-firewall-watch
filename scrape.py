@@ -139,7 +139,6 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
             except Exception as e:
                 print("failed to write search results; waiting until next attempt:", e)
         time.sleep(max(0, wait_time - took + time_noise))
-        break
 
     count, google_urls = write_search_results(google_results, 'google')
     google_img_count += count
@@ -170,6 +169,6 @@ if __name__ == "__main__":
         write_logs("got an error while running scraper:" + str(e) + " (see error log for details)", verbose=True)
         write_error(exc, verbose=True)
     if not error:
-        write_job_log(f'made {total_requests} requests and collected a total of {google_img_count + baidu_img_count} images over {printable_time(seconds=time.time()-ts)}', verbose=True)
+        write_job_log(f'made {total_requests} requests and collected a total of {google_img_count + baidu_img_count} images over {printable_time(seconds=time.time()-ts)}')
     else:
         write_job_log(f'failed to finish with error {str(e)} (details in errors.json), run terminated after {printable_time(seconds=time.time()-ts)}')

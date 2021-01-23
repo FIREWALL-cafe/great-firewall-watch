@@ -6,8 +6,8 @@ import requests
 For storing the results of the scraping
 '''
 
-# BASE_URL = 'http://api.firewallcafe.com'
-BASE_URL = 'http://159.89.80.47'
+BASE_URL = 'http://api.firewallcafe.com'
+# BASE_URL = 'http://159.89.80.47'
 
 def get_ip():
     r = requests.get('https://api.ipify.org?format=json')
