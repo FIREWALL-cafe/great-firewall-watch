@@ -22,9 +22,8 @@ def get_ip():
 def post_search(search, ip_address=None):
     if not ip_address:
         ip_address = get_ip()
-    print(search)
     r = requests.post(BASE_URL + '/createSearch', data={
-        'search_timestamp':search['ts'],
+        'search_timestamp': int(1000*search['ts']),
         # location of instance this is deployed on
         'search_location': 'new_york_city',
         # not sure there is a reliable way to get the IP address without hardcoding it, and that won't be great if we're using a proxy
@@ -45,22 +44,27 @@ def post_search(search, ip_address=None):
         'search_term_status_sensitive':False,
         'search_schema_initial':'test'
     })
-    return r.json()
-
-
+    return r.json()[0]
 
 def post_images(search_id, search_engine, urls):
-    print(image)
-    r = requests.post(BASE_URL + '/saveImage', data={
+    print("posting images associated with search ID", search_id)
+    r = requests.post(BASE_URL + '/saveImages', data={
         "search_id": search_id,
         "image_search_engine": search_engine,
-        "image_href": url
-    })    
+        "urls": urls,
+        "image_ranks": [i+1 for i,_ in enumerate(urls)]
+    })
+    print("result:", r.status_code, r.text)
 
 def save_search_results(results, search_engine):
-    search = post_search({'ts':123456543, 'english_term':'bunny', 'chinese_term':'asdf'}, '192.168.0.1')
-    # for each result, for each url in result['urls'], call post image
-    post_images(search["search_id"], search_engine, results['urls'])
+    for result in results:
+        print("result", result)
+        search = post_search(result, '192.168.0.1')
+        # for each result, for each url in result['urls'], call post image
+        print("search", search)
+        if 'name' in search and search['name'] == 'error':
+            print("could not POST search", result['english_term'])
+        post_images(search["search_id"], search_engine, result['urls'])
 
 if __name__ == "__main__":
-    save_search_results([])
+    save_search_results([{'english_term':'bunny', 'chinese_term':'', 'ts':1234545, }])

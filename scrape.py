@@ -11,7 +11,7 @@ import re
 import requests
 import time
 
-MAX_PICTURES_PER = 5
+MAX_PICTURES_PER = 2
 
 def query_baidu(term):
     baidu_template = 'https://image.baidu.com/search/index?tn=baiduimage&word={}'
@@ -135,7 +135,8 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
                 google_results = []
                 baidu_results = []
             except Exception as e:
-                print("failed to write search results; waiting until next attempt")
+                print("failed to write search results; waiting until next attempt:", e)
+        break
         time.sleep(max(0, wait_time - took + time_noise))
 
     google_img_count += write_search_results(google_results, 'google')
