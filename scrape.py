@@ -161,6 +161,7 @@ if __name__ == "__main__":
     ts = time.time()
     error = False
     try:
+        print(f"scraper started {datetime.utcnow()}")
         google_img_count, baidu_img_count, total_requests = run()
     except Exception as e:
         exc = traceback.format_exc()
