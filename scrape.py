@@ -128,24 +128,29 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
         # cache results. this is a backup and not meant to be a reliable data store
         if i % 25 == 0:
             try:
-                count, google_urls = write_search_results(google_results, 'google')
-                google_img_count += count
-                count, baidu_urls = write_search_results(baidu_results, 'baidu')
-                baidu_img_count += count
-                save_search_results(google_results, "google", google_urls)
-                save_search_results(baidu_results, "baidu", baidu_urls)
+                # count, google_urls = write_search_results(google_results, 'google')
+                # google_img_count += count
+                # save_search_results(google_results, "google", google_urls)
+                google_img_count += update_results(google_results, 'google')
+                # count, baidu_urls = write_search_results(baidu_results, 'baidu')
+                # baidu_img_count += count
+                # save_search_results(baidu_results, "baidu", baidu_urls)
+                baidu_img_count += update_results(baidu_results, 'baidu')
                 google_results = []
                 baidu_results = []
             except Exception as e:
                 print("failed to write search results; waiting until next attempt:", e)
         time.sleep(max(0, wait_time - took + time_noise))
 
-    count, google_urls = write_search_results(google_results, 'google')
-    google_img_count += count
-    count, baidu_urls = write_search_results(baidu_results, 'baidu')
-    baidu_img_count += count
-    save_search_results(google_results, "google", google_urls)
-    save_search_results(baidu_results, "baidu", baidu_urls)
+    # count, google_urls = write_search_results(google_results, 'google')
+    # google_img_count += count
+    # count, baidu_urls = write_search_results(baidu_results, 'baidu')
+    # baidu_img_count += count
+    # save_search_results(google_results, "google", google_urls)
+    # save_search_results(baidu_results, "baidu", baidu_urls)
+    google_img_count += update_results(google_results, 'google')
+    baidu_img_count += update_results(baidu_results, 'baidu')
+
     google_results = []
     baidu_results = []
 
@@ -154,6 +159,12 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
     write_error(f"Google failures: {len(google_fails)}")
     print("took", printable_time(seconds=time.time() - start_ts))
     return (google_img_count, baidu_img_count, total_requests)
+
+def update_results(results, engine):
+    count, urls = write_search_results(baidu_results, engine)
+    search_term_to_id = save_search_results(results, engine, urls)
+    # to do: update termlist with a URL that points to the search on the API
+    return count
 
 if __name__ == "__main__":
     import traceback

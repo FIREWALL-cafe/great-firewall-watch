@@ -236,3 +236,7 @@ def load_termlist():
     df = create_link_columns(df)
     write_termlist(df)
     return df
+
+def update_termlist(termlist, results):
+    # update the termlist to have links to the searches in the API
+    pass

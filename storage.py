@@ -59,6 +59,7 @@ def post_images(search_id, search_engine, urls):
     print("result:", r.status_code)
 
 def save_search_results(results, search_engine, url_list=None):
+    search_term_to_id = {}
     for result in results:
         print("result", result)
         search = post_search(result, '192.168.0.1')
@@ -67,6 +68,8 @@ def save_search_results(results, search_engine, url_list=None):
         if 'name' in search and search['name'] == 'error':
             print("could not POST search", result['english_term'])
         post_images(search["search_id"], search_engine, url_list if url_list is not None else result['urls'])
+        search_term_to_id[result['english_term']] = search["search_id"]
+    return search_term_to_id
 
 if __name__ == "__main__":
     import time
