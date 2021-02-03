@@ -42,8 +42,9 @@ def printable_time(days=0, hours=0, minutes=0, seconds=0):
     remainder = total_seconds % (24*60*60)
     return f"{total_days} days, {printable_time(seconds=remainder)}"
 
-def run(total_hours=24, hourly_limit=300, shuffle=False):
-    termlist = load_termlist()
+def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
+    if termlist is None:
+        termlist = load_termlist()
 
     total_requests = min(int(total_hours * hourly_limit), len(termlist))
     total_time = 60*60*min(total_hours, len(termlist)/hourly_limit)
