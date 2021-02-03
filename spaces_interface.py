@@ -134,7 +134,7 @@ def write_search_results(contents, search_engine):
         j = []
     
     status = write_json_file(json_fname, j + contents)
-
+    
     img_count = 0
     urls = []
     for term_results in contents:
@@ -159,7 +159,10 @@ def write_error(s, verbose=False):
     status_code = write_json_file('errors.json', new_contents)
     if verbose:
         print("got error:", s)
-        print("writing to file:", status_code)
+        print("writing to errors.json:", status_code)
+    status_code = write_text_file("error.txt", str(datetime.utcnow()) + ': ' + s)
+    if verbose:
+        print("writing to error.txt", status_code)
 
 def write_logs(s, verbose=False):
     if verbose:
