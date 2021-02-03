@@ -164,8 +164,8 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
     baidu_results = []
 
     write_logs(f'wrote {google_img_count} google images and {baidu_img_count} baidu images', verbose=True)
-    write_error(f"Baidu failures: {len(baidu_fails)}")
-    write_error(f"Google failures: {len(google_fails)}")
+    if len(baidu_fails) > 0 or len(google_fails) > 0:
+        write_error(f"Baidu failures: {len(baidu_fails)}, Google failures: {len(google_fails)}")
     print("took", printable_time(seconds=time.time() - start_ts))
     return (google_img_count, baidu_img_count, total_requests)
 
