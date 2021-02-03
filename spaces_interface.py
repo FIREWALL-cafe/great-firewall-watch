@@ -10,6 +10,7 @@ import json
 from pandas import read_excel
 from PIL import Image
 import requests
+import traceback
 from translate_gcp import machine_translate
 from urllib import parse
 
@@ -125,7 +126,7 @@ def write_search_results(contents, search_engine):
     datestring = str(datetime.utcnow().date())
     json_fname = f'search_results/{search_engine}_searches_{datestring}.json'
     try:
-        # print("getting file", json_fname)
+        print("getting file", f'{bucket_endpoint}/{json_fname}')
         r = requests.get(f'{bucket_endpoint}/{json_fname}')
         # print(r.status_code, "getting file", json_fname)
         j = json.loads(r.text)
@@ -147,7 +148,13 @@ def write_search_results(contents, search_engine):
     return img_count,urls
 
 def write_error(s, verbose=False):
-    file_contents = load_error_file()
+    try:
+        file_contents = load_error_file()
+    except Exception as e:
+        exc = traceback.format_exc()
+        print("could not load errors.json file from DigitalOcean")
+        print(exc)
+        return
     new_contents = [{'timestamp':str(datetime.utcnow()), 'error':s}] + file_contents
     status_code = write_json_file('errors.json', new_contents)
     if verbose:
@@ -157,7 +164,13 @@ def write_error(s, verbose=False):
 def write_logs(s, verbose=False):
     if verbose:
         print(s)
-    file_contents = load_json_file('log.json')
+    try:
+        file_contents = load_json_file('log.json')
+    except Exception as e:
+        exc = traceback.format_exc()
+        print("could not load log.json file from DigitalOcean")
+        print(exc)
+        return
     new_contents = [{'timestamp':str(datetime.utcnow()), 'log':s}] + file_contents
     status_code = write_json_file('log.json', new_contents)
     if verbose:

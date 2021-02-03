@@ -148,8 +148,16 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
     # baidu_img_count += count
     # save_search_results(google_results, "google", google_urls)
     # save_search_results(baidu_results, "baidu", baidu_urls)
-    google_img_count += update_results(google_results, 'google')
-    baidu_img_count += update_results(baidu_results, 'baidu')
+    try:
+        google_img_count += update_results(google_results, 'google')
+        baidu_img_count += update_results(baidu_results, 'baidu')
+    except Exception as e:
+        exc = traceback.format_exc()
+        print(exc)
+        print("Failed to update search results, waiting 1 minute")
+        time.sleep(60)
+        google_img_count += update_results(google_results, 'google')
+        baidu_img_count += update_results(baidu_results, 'baidu')
 
     google_results = []
     baidu_results = []
@@ -161,9 +169,10 @@ def run(total_hours=24, hourly_limit=300, shuffle=False):
     return (google_img_count, baidu_img_count, total_requests)
 
 def update_results(results, engine):
-    count, urls = write_search_results(baidu_results, engine)
+    count, urls = write_search_results(results, engine)
     search_term_to_id = save_search_results(results, engine, urls)
     # to do: update termlist with a URL that points to the search on the API
+    print(search_term_to_id)
     return count
 
 if __name__ == "__main__":
@@ -173,7 +182,7 @@ if __name__ == "__main__":
     error = False
     try:
         print(f"scraper started {datetime.utcnow()}")
-        google_img_count, baidu_img_count, total_requests = run()
+        google_img_count, baidu_img_count, total_requests = run(.005)
     except Exception as e:
         exc = traceback.format_exc()
         error = True
@@ -183,4 +192,4 @@ if __name__ == "__main__":
     if not error:
         write_job_log(f'made {total_requests} requests and collected a total of {google_img_count + baidu_img_count} images over {printable_time(seconds=time.time()-ts)}')
     else:
-        write_job_log(f'failed to finish with error {str(e)} (details in errors.json), run terminated after {printable_time(seconds=time.time()-ts)}')
+        write_job_log(f'failed to finish with error {exc} (details in errors.json), run terminated after {printable_time(seconds=time.time()-ts)}')
