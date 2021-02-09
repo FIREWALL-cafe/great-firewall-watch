@@ -193,5 +193,5 @@ if __name__ == "__main__":
     if not error:
         write_job_log(f'made {total_requests} requests and collected a total of {google_img_count + baidu_img_count} images over {printable_time(seconds=time.time()-ts)}', verbose=True)
     else:
-        write_job_log(f'failed to finish with error {exc} (details in errors.json), run terminated after {printable_time(seconds=time.time()-ts)}', verbose=True)
+        write_job_log(f'failed to finish with error (details in errors.json), run terminated after {printable_time(seconds=time.time()-ts)}', verbose=True)
     print("process finished")
