@@ -1,6 +1,6 @@
 import boto3
 from botocore.client import Config
-from boto3.s3.transfer import S3Transfer
+from boto3.s3.transfer import S3Transfer, TransferConfig
 import csv
 from datetime import datetime
 import hashlib
@@ -28,7 +28,8 @@ client = session.client('s3',
                         endpoint_url=f'https://{j["region"]}.digitaloceanspaces.com',
                         aws_access_key_id=j['access_key_id'],
                         aws_secret_access_key=j['secret_access_key'])
-transfer = S3Transfer(client)
+config = TransferConfig(use_threads=False, max_concurrency=1)
+transfer = S3Transfer(client, config=config)
 
 # List all buckets on your account.
 try:
@@ -209,7 +210,7 @@ def write_termlist(df):
     # make that file public
     r = client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key=fname)
     print("result:", r['ResponseMetadata']['HTTPStatusCode'])
-
+    
 def create_link_columns(df):
     '''
     Use the "english" and "chinese" columns in the termlist to create links to the digitalocean folders 
