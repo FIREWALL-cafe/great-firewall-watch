@@ -90,6 +90,7 @@ def _write_public(fname, new_fname=None):
     transfer.upload_file(fname, j['bucket'], new_fname)
     # make that file public
     r = client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key=new_fname)
+    # print("_write_file:", f'{bucket_endpoint}/{new_fname}')
     return r['ResponseMetadata']['HTTPStatusCode']
 
 def request_and_write_image(url, spaces_folder):
@@ -98,7 +99,7 @@ def request_and_write_image(url, spaces_folder):
     except Exception as e:
         print(url, e)
         return
-    print(r.status_code, "getting image", url)
+    # print(r.status_code, "getting image", url)
     if not r.ok:
         return
     # write locally
@@ -123,30 +124,35 @@ def write_text_file(fname, contents):
         f.write(contents)
     return _write_public(fname)
 
-def write_search_results(contents, search_engine):
+def write_search_results(results_list, search_engine):
+    '''
+    Receives a list of result objects, each one a search with a term and the resulting image URLs.
+    Returns the number of images retrieved, and a dictionary mapping the term to the new URLs stored
+    on Digital Ocean
+    '''
     datestring = str(datetime.utcnow().date())
     json_fname = f'search_results/{search_engine}_searches_{datestring}.json'
     try:
-        print("getting file", f'{bucket_endpoint}/{json_fname}')
+        # print("getting file", f'{bucket_endpoint}/{json_fname}')
         r = requests.get(f'{bucket_endpoint}/{json_fname}')
         # print(r.status_code, "getting file", json_fname)
         j = json.loads(r.text)
     except json.decoder.JSONDecodeError: # no file exists
         j = []
-    
-    status = write_json_file(json_fname, j + contents)
+    print(f"writing {len(results_list)} search results")
+    status = write_json_file(json_fname, j + results_list)
     
     img_count = 0
-    urls = []
-    for term_results in contents:
+    for term_results in results_list:
         term = combined_term(term_results['english_term'], term_results['chinese_term'])
+        term_results['do_urls'] = []
         for url in term_results['urls']:
             spaces_folder = 'images/hashed'
             fname = request_and_write_image(url, spaces_folder)
             if fname:
                 img_count += 1
-                urls.append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
-    return img_count,urls
+                term_results['do_urls'].append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
+    return img_count,results_list
 
 def write_error(s, verbose=False):
     try:
@@ -209,7 +215,7 @@ def write_termlist(df):
     transfer.upload_file(fname, j['bucket'], fname)
     # make that file public
     r = client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key=fname)
-    print("result:", r['ResponseMetadata']['HTTPStatusCode'])
+    print("termlist write result:", r['ResponseMetadata']['HTTPStatusCode'])
     
 def create_link_columns(df):
     '''

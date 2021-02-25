@@ -67,7 +67,7 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         print("Warning: termlist length is", len(termlist), "while max daily requests will be", daily_max_requests)
     if len(termlist) > total_requests:
         print(f"Warning: only querying {total_requests} of {len(termlist)} total terms (not enough time specified)")
-    write_logs(f"querying {total_requests} terms for {printable_time(seconds=total_time)}", verbose=True)
+    write_logs(f"querying {total_requests} terms for a minimum of {printable_time(seconds=total_time)}", verbose=True)
     
     term_idx = 0
     google_img_count = 0
@@ -127,41 +127,33 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         # print("adding noise to wait time", printable_time(seconds=time_noise))
 
         # cache results. this is a backup and not meant to be a reliable data store
-        if i % 25 == 0:
+        if i % 25 == 24:
             try:
-                # count, google_urls = write_search_results(google_results, 'google')
-                # google_img_count += count
-                # save_search_results(google_results, "google", google_urls)
                 google_img_count += update_results(google_results, 'google')
-                # count, baidu_urls = write_search_results(baidu_results, 'baidu')
-                # baidu_img_count += count
-                # save_search_results(baidu_results, "baidu", baidu_urls)
                 baidu_img_count += update_results(baidu_results, 'baidu')
                 google_results = []
                 baidu_results = []
             except Exception as e:
+                import traceback
                 print("failed to write search results; waiting until next attempt:", e)
+                exc = traceback.format_exc()
+                print(str(exc))
         time.sleep(max(0, wait_time - took + time_noise))
 
-    # count, google_urls = write_search_results(google_results, 'google')
-    # google_img_count += count
-    # count, baidu_urls = write_search_results(baidu_results, 'baidu')
-    # baidu_img_count += count
-    # save_search_results(google_results, "google", google_urls)
-    # save_search_results(baidu_results, "baidu", baidu_urls)
-    try:
-        google_img_count += update_results(google_results, 'google')
-        baidu_img_count += update_results(baidu_results, 'baidu')
-    except Exception as e:
-        exc = traceback.format_exc()
-        print(exc)
-        print("Failed to update search results, waiting 1 minute")
-        time.sleep(60)
-        google_img_count += update_results(google_results, 'google')
-        baidu_img_count += update_results(baidu_results, 'baidu')
+    if len(google_results) > 0 or len(baidu_results) > 0:
+        try:
+            google_img_count += update_results(google_results, 'google')
+            baidu_img_count += update_results(baidu_results, 'baidu')
+        except Exception as e:
+            exc = traceback.format_exc()
+            print(exc)
+            print("Failed to update search results, waiting 1 minute")
+            time.sleep(60)
+            google_img_count += update_results(google_results, 'google')
+            baidu_img_count += update_results(baidu_results, 'baidu')
 
-    google_results = []
-    baidu_results = []
+        google_results = []
+        baidu_results = []
 
     write_logs(f'wrote {google_img_count} google images and {baidu_img_count} baidu images', verbose=True)
     if len(baidu_fails) > 0 or len(google_fails) > 0:
@@ -170,10 +162,10 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
     return (google_img_count, baidu_img_count, total_requests)
 
 def update_results(results, engine):
-    count, urls = write_search_results(results, engine)
-    search_term_to_id = save_search_results(results, engine, urls)
+    count, results = write_search_results(results, engine)
+    search_term_to_id = save_search_results(results, engine)
     # to do: update termlist with a URL that points to the search on the API
-    print(search_term_to_id)
+    print("search IDs:", search_term_to_id)
     return count
 
 if __name__ == "__main__":

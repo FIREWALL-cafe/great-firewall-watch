@@ -47,7 +47,7 @@ def post_search(search, ip_address=None):
     return r.json()[0]
 
 def post_images(search_id, search_engine, urls):
-    print("posting images associated with search ID", search_id)
+    print(f"posting {len(urls)} images associated with search ID {search_id}")
     body = {
         "search_id": search_id,
         "image_search_engine": search_engine,
@@ -58,16 +58,23 @@ def post_images(search_id, search_engine, urls):
     r = requests.post(BASE_URL + '/saveImages', data=body)
     print("result:", r.status_code)
 
-def save_search_results(results, search_engine, url_list=None):
+def save_search_results(results, search_engine):
+    '''
+    Given a set of searches that the scraper has created, post each individually to 
+    the /createSearch endpoint. spaces_interface.write_search_results should have
+    created a new list in each result object of the Digital Ocean URLs
+    '''
     search_term_to_id = {}
+    print(f"saving {len(results)} search terms")
     for result in results:
-        print("result", result)
+        print(search_engine, "results:", len(result))
         search = post_search(result, '192.168.0.1')
         # for each result, for each url in result['urls'], call post image
         # print("search", search)
         if 'name' in search and search['name'] == 'error':
             print("could not POST search", result['english_term'])
-        post_images(search["search_id"], search_engine, url_list if url_list is not None else result['urls'])
+        save_urls = result['do_urls']
+        post_images(search["search_id"], search_engine, save_urls)
         search_term_to_id[result['english_term']] = search["search_id"]
     return search_term_to_id
 
