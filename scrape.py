@@ -11,7 +11,7 @@ import re
 import requests
 import time
 
-MAX_PICTURES_PER = 5
+MAX_PICTURES_PER = 10
 
 def query_baidu(term):
     baidu_template = 'https://image.baidu.com/search/index?tn=baiduimage&word={}'
