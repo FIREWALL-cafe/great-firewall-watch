@@ -14,7 +14,6 @@ import time
 MAX_PICTURES_PER = 10
 
 def query_baidu(term):
-    baidu_template = 'https://image.baidu.com/search/index?tn=baiduimage&word={}'
     user_agent = get_user_agent()
     url = 'https://image.baidu.com/search/flip?tn=baiduimage&ie=utf-8&word='+term+'&ct=201326592&v=flip'
     r = requests.get(url, timeout=10,
