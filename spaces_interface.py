@@ -13,6 +13,7 @@ import requests
 import traceback
 from translate_gcp import machine_translate
 from urllib import parse
+from watch_utils import combined_term
 
 '''
 This is for reporting errors and statistics about the scraping rather than the results of the scraping itself
@@ -48,9 +49,6 @@ def image_fname(fname):
     if ext == 'jpeg':
         ext = 'jpg'
     return f'{hashed}.{ext}'
-
-def combined_term(english, chinese):
-    return f'{english}_{chinese}'
 
 def load_json_file(fname):
     if '.json' not in fname:
@@ -124,14 +122,14 @@ def write_text_file(fname, contents):
         f.write(contents)
     return _write_public(fname)
 
-def write_search_results(results_list, search_engine):
+def write_search_results(results):
     '''
     Receives a list of result objects, each one a search with a term and the resulting image URLs.
     Returns the number of images retrieved, and a dictionary mapping the term to the new URLs stored
     on Digital Ocean
     '''
     datestring = str(datetime.utcnow().date())
-    json_fname = f'search_results/{search_engine}_searches_{datestring}.json'
+    json_fname = f'search_results/searches_{datestring}.json'
     try:
         # print("getting file", f'{bucket_endpoint}/{json_fname}')
         r = requests.get(f'{bucket_endpoint}/{json_fname}')
@@ -139,20 +137,21 @@ def write_search_results(results_list, search_engine):
         j = json.loads(r.text)
     except json.decoder.JSONDecodeError: # no file exists
         j = []
-    print(f"writing {len(results_list)} search results")
-    status = write_json_file(json_fname, j + results_list)
+    print(f"writing {results.length} search results")
+    # status = write_json_file(json_fname, j + results_list)
     
     img_count = 0
-    for term_results in results_list:
-        term = combined_term(term_results['english_term'], term_results['chinese_term'])
-        term_results['do_urls'] = []
-        for url in term_results['urls']:
-            spaces_folder = 'images/hashed'
-            fname = request_and_write_image(url, spaces_folder)
-            if fname:
-                img_count += 1
-                term_results['do_urls'].append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
-    return img_count,results_list
+    for term,result in results.iterterm():
+        datalake_urls = []
+        for search_engine in ['google', 'baidu']:
+            for url in result.urls[search_engine]:
+                spaces_folder = 'images/hashed'
+                fname = request_and_write_image(url, spaces_folder)
+                if fname:
+                    img_count += 1
+                    datalake_urls.append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
+            result.set_datalake_urls(datalake_urls, search_engine)
+    return img_count
 
 def write_error(s, verbose=False):
     try:
