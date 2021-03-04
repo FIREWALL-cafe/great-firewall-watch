@@ -1,5 +1,7 @@
-from spaces_interface import load_termlist, write_error, write_search_results, write_logs, write_job_log
-from storage import save_search_results
+# from spaces_interface import load_termlist, write_error, write_search_results, write_logs, write_job_log
+import api_interface as api
+from results import ResultSet, ResultSetList
+import spaces_interface as space
 from user_agent import get_user_agent
 
 from bs4 import BeautifulSoup
@@ -43,7 +45,7 @@ def printable_time(days=0, hours=0, minutes=0, seconds=0):
 
 def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
     if termlist is None:
-        termlist = load_termlist()
+        termlist = space.load_termlist()
 
     total_requests = min(int(total_hours * hourly_limit), len(termlist))
     total_time = 60*60*min(total_hours, len(termlist)/hourly_limit)
@@ -66,14 +68,15 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         print("Warning: termlist length is", len(termlist), "while max daily requests will be", daily_max_requests)
     if len(termlist) > total_requests:
         print(f"Warning: only querying {total_requests} of {len(termlist)} total terms (not enough time specified)")
-    write_logs(f"querying {total_requests} terms for a minimum of {printable_time(seconds=total_time)}", verbose=True)
+    space.write_logs(f"querying {total_requests} terms for a minimum of {printable_time(seconds=total_time)}", verbose=True)
     
     term_idx = 0
     google_img_count = 0
     baidu_img_count = 0
     google_fails = []
     baidu_fails = []
-    google_results = []
+    # google_results = []
+    results = ResultSetList()
     baidu_results = []
 
     start_ts = time.time()
@@ -92,12 +95,14 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
             try:
                 urls = query_google(english_term)
                 print(f"\tGoogle got {len(urls)} images")
-                result = {}
-                result['english_term'] = english_term
-                result['chinese_term'] = chinese_term
-                result['urls'] = urls[:MAX_PICTURES_PER]
-                result['ts'] = time.time()
-                google_results.append(result)
+                # result = {}
+                result = ResultSet(english_term, chinese_term)
+                # result['english_term'] = english_term
+                # result['chinese_term'] = chinese_term
+                # result['urls'] = urls[:MAX_PICTURES_PER]
+                # result['ts'] = time.time()
+                result.add(urls, 'google')
+                results.add(result)
             except Exception as e:
                 google_fails.append(e)
                 print("\tGoogle fail")
@@ -128,9 +133,10 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         # cache results. this is a backup and not meant to be a reliable data store
         if i % 25 == 24:
             try:
-                google_img_count += update_results(google_results, 'google')
-                baidu_img_count += update_results(baidu_results, 'baidu')
-                google_results = []
+                update_results(results)
+                results.clear()
+                google_img_count += results.wrote['google']
+                baidu_img_count += results.wrote['baidu']
                 baidu_results = []
             except Exception as e:
                 import traceback
@@ -139,30 +145,34 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
                 print(str(exc))
         time.sleep(max(0, wait_time - took + time_noise))
 
-    if len(google_results) > 0 or len(baidu_results) > 0:
+    if results.length > 0 or len(baidu_results) > 0:
         try:
-            google_img_count += update_results(google_results, 'google')
-            baidu_img_count += update_results(baidu_results, 'baidu')
+            update_results(results)
+            results.clear()
+            google_img_count += results.wrote['google']
+            baidu_img_count += results.wrote['baidu']
         except Exception as e:
+            import traceback
             exc = traceback.format_exc()
             print(exc)
             print("Failed to update search results, waiting 1 minute")
             time.sleep(60)
-            google_img_count += update_results(google_results, 'google')
-            baidu_img_count += update_results(baidu_results, 'baidu')
+            update_results(results)
+            results.clear()
+            google_img_count += results.wrote['google']
+            baidu_img_count += results.wrote['baidu']
 
-        google_results = []
         baidu_results = []
 
-    write_logs(f'wrote {google_img_count} google images and {baidu_img_count} baidu images', verbose=True)
+    space.write_logs(f'wrote {results.wrote["google"]} google images and {results.wrote["baidu"]} baidu images', verbose=True)
     if len(baidu_fails) > 0 or len(google_fails) > 0:
-        write_error(f"Baidu failures: {len(baidu_fails)}, Google failures: {len(google_fails)}")
+        space.write_error(f"Baidu failures: {len(baidu_fails)}, Google failures: {len(google_fails)}")
     print("took", printable_time(seconds=time.time() - start_ts))
     return (google_img_count, baidu_img_count, total_requests)
 
-def update_results(results, engine):
-    count, results = write_search_results(results, engine)
-    search_term_to_id = save_search_results(results, engine)
+def update_results(results):
+    count = space.write_search_results(results)
+    search_term_to_id = api.save_search_results(results)
     # to do: update termlist with a URL that points to the search on the API
     print("search IDs:", search_term_to_id)
     return count
@@ -179,10 +189,10 @@ if __name__ == "__main__":
         exc = traceback.format_exc()
         error = True
         print(str(exc))
-        write_logs("got an error while running scraper:" + str(e) + " (see error log for details)", verbose=True)
-        write_error(exc, verbose=True)
+        space.write_logs("got an error while running scraper:" + str(e) + " (see error log for details)", verbose=True)
+        space.write_error(exc, verbose=True)
     if not error:
-        write_job_log(f'made {total_requests} requests and collected a total of {google_img_count + baidu_img_count} images over {printable_time(seconds=time.time()-ts)}', verbose=True)
+        space.write_job_log(f'made {total_requests} requests and collected a total of {google_img_count + baidu_img_count} images over {printable_time(seconds=time.time()-ts)}', verbose=True)
     else:
-        write_job_log(f'failed to finish with error (details in errors.json), run terminated after {printable_time(seconds=time.time()-ts)}', verbose=True)
+        space.write_job_log(f'failed to finish with error (details in errors.json), run terminated after {printable_time(seconds=time.time()-ts)}', verbose=True)
     print("process finished")
