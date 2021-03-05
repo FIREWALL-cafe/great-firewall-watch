@@ -13,7 +13,7 @@ import requests
 import traceback
 from translate_gcp import machine_translate
 from urllib import parse
-from watch_utils import combined_term
+from watch_utils import combined_term, BAIDU, GOOGLE
 
 '''
 This is for reporting errors and statistics about the scraping rather than the results of the scraping itself
@@ -142,8 +142,8 @@ def write_search_results(results):
     
     img_count = 0
     for term,result in results.iterterm():
-        datalake_urls = []
-        for search_engine in ['google', 'baidu']:
+        for search_engine in [BAIDU, GOOGLE]:
+            datalake_urls = []
             for url in result.urls[search_engine]:
                 spaces_folder = 'images/hashed'
                 fname = request_and_write_image(url, spaces_folder)
@@ -230,8 +230,8 @@ def create_link_columns(df):
         # link format: '=HYPERLINK(\"\"; \"{3}\")'
         # return f'=HYPERLINK("{spaces_endpoint + parse.quote_plus(folder_name)}", "{folder_name}")'
         return spaces_endpoint + parse.quote_plus(folder_name)
-    df['link_google'] = df.apply(lambda row: formatted_link(row, 'google'), axis='columns')
-    df['link_baidu'] = df.apply(lambda row: formatted_link(row, 'baidu'), axis='columns')
+    df['link_google'] = df.apply(lambda row: formatted_link(row, GOOGLE), axis='columns')
+    df['link_baidu'] = df.apply(lambda row: formatted_link(row, BAIDU), axis='columns')
     return df
 
 def load_termlist():

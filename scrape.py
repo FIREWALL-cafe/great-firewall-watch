@@ -3,6 +3,7 @@ import api_interface as api
 from results import ResultSet, ResultSetList
 import spaces_interface as space
 from user_agent import get_user_agent
+from watch_utils import BAIDU, GOOGLE
 
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -75,9 +76,7 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
     baidu_img_count = 0
     google_fails = []
     baidu_fails = []
-    # google_results = []
     results = ResultSetList()
-    baidu_results = []
 
     start_ts = time.time()
     for i in range(0, total_requests):
@@ -88,21 +87,15 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         except:
             print("out of terms")
             break
-        print(f'request {i}, term idx {term_idx}: "{english_term}", "{chinese_term}"')
+        result = ResultSet(english_term, chinese_term)
+        print(f'request {i}, term idx {term_idx}: "{result.combined_term()}"')
         if not english_term:
             print("\tskipping Google for term (English term not present)")
         else:
             try:
                 urls = query_google(english_term)
-                print(f"\tGoogle got {len(urls)} images")
-                # result = {}
-                result = ResultSet(english_term, chinese_term)
-                # result['english_term'] = english_term
-                # result['chinese_term'] = chinese_term
-                # result['urls'] = urls[:MAX_PICTURES_PER]
-                # result['ts'] = time.time()
-                result.add(urls, 'google')
-                results.add(result)
+                # print(f"\tGoogle got {len(urls)} images")
+                result.add(urls[:MAX_PICTURES_PER], GOOGLE)
             except Exception as e:
                 google_fails.append(e)
                 print("\tGoogle fail")
@@ -111,17 +104,13 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         else:
             try:
                 urls = query_baidu(chinese_term)
-                print(f"\tbaidu got {len(urls)} images")
-                result = {}
-                result['english_term'] = english_term
-                result['chinese_term'] = chinese_term
-                result['urls'] = urls[:MAX_PICTURES_PER]
-                result['ts'] = time.time()
-                baidu_results.append(result)
+                # print(f"\tbaidu got {len(urls)} images")
+                result.add(urls[:MAX_PICTURES_PER], BAIDU)
             except Exception as e:
                 baidu_fails.append(e)
                 print("\tBaidu fail")
         print("done querying search engines for term", english_term)
+        results.add(result)
         term_idx += 1
 
         # account for the time the calls took
@@ -135,9 +124,8 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
             try:
                 update_results(results)
                 results.clear()
-                google_img_count += results.wrote['google']
-                baidu_img_count += results.wrote['baidu']
-                baidu_results = []
+                google_img_count += results.wrote[GOOGLE]
+                baidu_img_count += results.wrote[BAIDU]
             except Exception as e:
                 import traceback
                 print("failed to write search results; waiting until next attempt:", e)
@@ -145,12 +133,12 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
                 print(str(exc))
         time.sleep(max(0, wait_time - took + time_noise))
 
-    if results.length > 0 or len(baidu_results) > 0:
+    if results.length > 0:
         try:
             update_results(results)
             results.clear()
-            google_img_count += results.wrote['google']
-            baidu_img_count += results.wrote['baidu']
+            google_img_count += results.wrote[GOOGLE]
+            baidu_img_count += results.wrote[BAIDU]
         except Exception as e:
             import traceback
             exc = traceback.format_exc()
@@ -159,12 +147,10 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
             time.sleep(60)
             update_results(results)
             results.clear()
-            google_img_count += results.wrote['google']
-            baidu_img_count += results.wrote['baidu']
+            google_img_count += results.wrote[GOOGLE]
+            baidu_img_count += results.wrote[BAIDU]
 
-        baidu_results = []
-
-    space.write_logs(f'wrote {results.wrote["google"]} google images and {results.wrote["baidu"]} baidu images', verbose=True)
+    space.write_logs(f'wrote {results.wrote["google"]} google images and {results.wrote[BAIDU]} baidu images', verbose=True)
     if len(baidu_fails) > 0 or len(google_fails) > 0:
         space.write_error(f"Baidu failures: {len(baidu_fails)}, Google failures: {len(google_fails)}")
     print("took", printable_time(seconds=time.time() - start_ts))

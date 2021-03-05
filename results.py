@@ -52,7 +52,6 @@ class ResultSetList:
         self.wrote['google'] = sum([len(result.get_datalake_urls('google')) for term,result in self.iterterm()])
         self.wrote['baidu'] = sum([len(result.get_datalake_urls('baidu')) for term,result in self.iterterm()])
         print("cleared", self.wrote)
-        # print([(term,result.get_datalake_urls('google')) for term,result in self.iterterm()])
         self.dict = {}
 
     @property
