@@ -1,6 +1,7 @@
 
 from datetime import datetime
 import requests
+from watch_utils import BAIDU, GOOGLE
 
 '''
 For storing the results of the scraping
@@ -77,8 +78,8 @@ def save_search_results(results):
         # print("search", search)
         if 'name' in post_result and post_result['name'] == 'error':
             print("could not POST search", post_result['english_term'])
-        post_images(post_result["search_id"], 'google', result.get_datalake_urls('google'))
-        post_images(post_result["search_id"], 'baidu', result.get_datalake_urls('baidu'))
+        post_images(post_result["search_id"], GOOGLE, result.get_datalake_urls(GOOGLE))
+        post_images(post_result["search_id"], BAIDU, result.get_datalake_urls(BAIDU))
         search_term_to_id[result.combined_term()] = post_result["search_id"]
     return search_term_to_id
 
@@ -86,8 +87,8 @@ if __name__ == "__main__":
     from results import ResultSet, ResultSetList
     import time
     result = ResultSet('bunny', '')
-    result.add(['google.com', 'bunnies.io'], 'google')
-    result.set_datalake_urls(['datalake.com/google.com', 'datalake.com/bunnies.io'], 'google')
+    result.add(['google.com', 'bunnies.io'], GOOGLE)
+    result.set_datalake_urls(['datalake.com/google.com', 'datalake.com/bunnies.io'], GOOGLE)
     results = ResultSetList()
     results.add(result)
     save_search_results(results)
