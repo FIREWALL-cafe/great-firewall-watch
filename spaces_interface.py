@@ -241,7 +241,11 @@ def load_termlist():
     try:
         df = read_excel(base_url + 'termlist.xlsx').fillna('')
     except:
-        raise Exception("failed to load termlist at " + base_url + 'termlist.xlsx')
+        client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key='termlist.xlsx')
+        try:
+            df = read_excel(base_url + 'termlist.xlsx').fillna('')
+        except:
+            raise Exception("failed to load termlist at " + base_url + 'termlist.xlsx')
 
     needs_translation = False
     for i,row in df.fillna('').iterrows():

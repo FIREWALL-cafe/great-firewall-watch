@@ -1,5 +1,5 @@
-
 from datetime import datetime
+import json
 import requests
 from watch_utils import BAIDU, GOOGLE
 
@@ -9,6 +9,13 @@ For storing the results of the scraping
 
 BASE_URL = 'http://api.firewallcafe.com'
 # BASE_URL = 'http://159.89.80.47'
+with open('config.json') as f:
+    j = json.loads(f.read())
+    try:
+        BASE_URL = j['api_url']
+    except:
+        pass
+print('saving search objects to', BASE_URL)
 
 def get_ip():
     import socket
