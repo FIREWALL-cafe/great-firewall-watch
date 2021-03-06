@@ -263,6 +263,27 @@ def load_termlist():
     write_termlist(df)
     return df
 
+def load_termlist_folder(name='daily'):
+    '''
+    load all files with an _active prefix in the given folder, concatenating them into one termlist for the whole run
+    note that this concatenation will prevent the scraper from writing out any results from the scraper after it has run
+    '''
+    pass
+
+def preload_termlists():
+    '''
+    check all termlist folders for 1-to-1 correspondence between a given termlist and the activated version. activate any new termlist
+    and delete any active termlist that's had its input termlist deleted. 
+    '''
+    pass
+
+def activate_termlist(name):
+    '''
+    take a termlist which has been uploaded ("input termlist"), do any translation, linking, and formatting work, and save a copy with
+    an _active prefix, with permissions set to private
+    '''
+    pass
+
 def update_termlist(termlist, results):
     # update the termlist to have links to the searches in the API
     pass
