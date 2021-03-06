@@ -109,7 +109,7 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
             except Exception as e:
                 baidu_fails.append(e)
                 print("\tBaidu fail")
-        print("done querying search engines for term", english_term)
+        # print("done querying search engines for term", english_term)
         results.add(result)
         term_idx += 1
 
