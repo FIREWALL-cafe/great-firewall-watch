@@ -151,6 +151,7 @@ def write_search_results(results):
                     img_count += 1
                     datalake_urls.append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
             result.set_datalake_urls(datalake_urls, search_engine)
+            print('.', end='')
     return img_count
 
 def write_error(s, verbose=False):

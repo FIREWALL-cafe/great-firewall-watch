@@ -9,5 +9,4 @@ def get_user_agent():
             agents_list = json.loads(f.read())
             return random.choice(agents_list)            
     except Exception as e:
-        # print("error loading user agents list", e)
         return DEFAULT
