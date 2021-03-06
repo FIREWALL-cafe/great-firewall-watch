@@ -14,7 +14,7 @@ import re
 import requests
 import time
 
-MAX_PICTURES_PER = 10
+MAX_PICTURES_PER = 20
 
 def query_baidu(term):
     user_agent = get_user_agent()
