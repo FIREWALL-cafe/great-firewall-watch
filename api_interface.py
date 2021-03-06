@@ -10,9 +10,9 @@ For storing the results of the scraping
 BASE_URL = 'http://api.firewallcafe.com'
 # BASE_URL = 'http://159.89.80.47'
 with open('config.json') as f:
-    j = json.loads(f.read())
+    config = json.loads(f.read())
     try:
-        BASE_URL = j['api_url']
+        BASE_URL = config['api_url']
     except:
         pass
 print('saving search objects to', BASE_URL)
@@ -34,7 +34,7 @@ def post_search(result, ip_address=None):
     r = requests.post(BASE_URL + '/createSearch', data={
         'search_timestamp': int(1000*result.ts),
         # location of instance this is deployed on
-        'search_location': 'automated_scraper',
+        'search_location': config['location'] if 'location' in config else config['region'],
         'search_ip_address': ip_address,
         'search_client_name':'automated_scraper',
 
