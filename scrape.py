@@ -170,7 +170,7 @@ if __name__ == "__main__":
     error = False
     try:
         print(f"scraper started {datetime.utcnow()}")
-        google_img_count, baidu_img_count, total_requests = run()
+        google_img_count, baidu_img_count, total_requests = run(shuffle=True)
     except Exception as e:
         exc = traceback.format_exc()
         error = True
