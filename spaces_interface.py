@@ -145,6 +145,7 @@ def write_search_results(results):
     
     img_count = 0
     for term,result in results.iterterm():
+        print(term)
         for search_engine in [BAIDU, GOOGLE]:
             datalake_urls = []
             for url in result.urls[search_engine]:
@@ -153,8 +154,10 @@ def write_search_results(results):
                 if fname:
                     img_count += 1
                     datalake_urls.append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
+            print("done with", search_engine)
             result.set_datalake_urls(datalake_urls, search_engine)
         print('.', end='')
+    print("finished writing images")
     return img_count
 
 def write_error(s, verbose=False):
