@@ -19,7 +19,7 @@ print('saving search objects to', BASE_URL)
 
 def get_ip():
     import socket
-    r = requests.get('https://api.ipify.org?format=json')
+    r = requests.get('https://api.ipify.org?format=json', timeout=10)
     if r.status_code == 200:
         return r.json()['ip']
     else:
@@ -31,7 +31,7 @@ def get_ip():
 def post_search(result, ip_address=None):
     if not ip_address:
         ip_address = get_ip()
-    r = requests.post(BASE_URL + '/createSearch', data={
+    r = requests.post(BASE_URL + '/createSearch', timeout=10, data={
         'search_timestamp': int(1000*result.ts),
         # location of instance this is deployed on
         'search_location': config['location'] if 'location' in config else config['region'],
@@ -65,7 +65,7 @@ def post_images(search_id, search_engine, urls):
             "image_ranks": [i+1 for i,_ in enumerate(urls)]
         }
         # print(body)
-        r = requests.post(BASE_URL + '/saveImages', data=body)
+        r = requests.post(BASE_URL + '/saveImages', timeout=10, data=body)
         print("result:", r.status_code)
     else:
         pass

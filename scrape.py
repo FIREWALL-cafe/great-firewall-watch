@@ -27,7 +27,7 @@ def query_baidu(term):
 
 def query_google(term):
     google_template = 'https://www.google.com/search?q={}&tbm=isch'
-    r = requests.get(google_template.format(term))
+    r = requests.get(google_template.format(term), timeout=10)
     soup = BeautifulSoup(r.text, features="html.parser")
     urls = [tag.get('src') for tag in soup.find_all('img') if tag.get('src')[:4] == 'http']
     return urls

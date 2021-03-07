@@ -53,7 +53,7 @@ def image_fname(fname):
 def load_json_file(fname):
     if '.json' not in fname:
         fname += '.json'
-    r = requests.get(f'{bucket_endpoint}/{fname}')
+    r = requests.get(f'{bucket_endpoint}/{fname}', timeout=10)
     if not r.status_code == 200:
         return []
     return r.json()
@@ -66,9 +66,9 @@ def load_text_file(fname):
 
 def load_error_file(suffix=''):
     if suffix:
-        r = requests.get(f'{bucket_endpoint}/errors_{suffix}.json')
+        r = requests.get(f'{bucket_endpoint}/errors_{suffix}.json', timeout=10)
     else:
-        r = requests.get(f'{bucket_endpoint}/errors.json')
+        r = requests.get(f'{bucket_endpoint}/errors.json', timeout=10)
     if r.status_code == 200:
         # print("found the file")
         return r.json()
@@ -94,7 +94,10 @@ def _write_public(fname, new_fname=None):
 def request_and_write_image(url, spaces_folder):
     print("getting image:", url, end=' ')
     try:
-        r = requests.get(url, stream=True)
+        r = requests.get(url, stream=True, timeout=10)
+    except requests.exceptions.Timeout:
+        print("timed out on", url)
+        return
     except Exception as e:
         print(url, e)
         return
@@ -135,7 +138,7 @@ def write_search_results(results):
     json_fname = f'search_results/searches_{datestring}.json'
     try:
         # print("getting file", f'{bucket_endpoint}/{json_fname}')
-        r = requests.get(f'{bucket_endpoint}/{json_fname}')
+        r = requests.get(f'{bucket_endpoint}/{json_fname}', timeout=10)
         # print(r.status_code, "getting file", json_fname)
         j = json.loads(r.text)
     except json.decoder.JSONDecodeError: # no file exists
