@@ -61,17 +61,17 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         pass
 
     # not sure if shuffle is needed, if so try shuffling index
+    term_indices = list(termlist.index)
     if shuffle:
-        raise NotImplementedError()
-    #     print("shuffling termlist")
-    #     random.shuffle(termlist)
+        # raise NotImplementedError()
+        print("shuffling termlist")
+        random.shuffle(term_indices)
     if len(termlist) > daily_max_requests:
         print("Warning: termlist length is", len(termlist), "while max daily requests will be", daily_max_requests)
     if len(termlist) > total_requests:
         print(f"Warning: only querying {total_requests} of {len(termlist)} total terms (not enough time specified)")
     space.write_logs(f"querying {total_requests} terms for a minimum of {printable_time(seconds=total_time)}", verbose=True)
     
-    term_idx = 0
     google_img_count = 0
     baidu_img_count = 0
     google_fails = []
@@ -80,6 +80,7 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
 
     start_ts = time.time()
     for i in range(0, total_requests):
+        term_idx = term_indices.pop()
         start_iter_ts = time.time()
         try:
             english_term = termlist.loc[term_idx].english
@@ -111,7 +112,6 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
                 print("\tBaidu fail")
         # print("done querying search engines for term", english_term)
         results.add(result)
-        term_idx += 1
 
         # account for the time the calls took
         took = time.time() - start_iter_ts
