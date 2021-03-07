@@ -97,7 +97,7 @@ def request_and_write_image(url, spaces_folder):
     except Exception as e:
         print(url, e)
         return
-    # print(r.status_code, "getting image", url)
+    print(r.status_code, "getting image", url)
     if not r.ok:
         return
     # write locally
@@ -151,7 +151,7 @@ def write_search_results(results):
                     img_count += 1
                     datalake_urls.append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
             result.set_datalake_urls(datalake_urls, search_engine)
-            print('.', end='')
+        print('.', end='')
     return img_count
 
 def write_error(s, verbose=False):

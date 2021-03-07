@@ -14,7 +14,7 @@ import re
 import requests
 import time
 
-MAX_PICTURES_PER = 20
+MAX_PICTURES_PER = 10
 
 def query_baidu(term):
     user_agent = get_user_agent()
@@ -57,8 +57,8 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         import os
         os.mkdir('search_results')
     except Exception as e:
-        print("could not make directory", e)
-        # pass
+        # print("could not make directory", e)
+        pass
 
     # not sure if shuffle is needed, if so try shuffling index
     if shuffle:
