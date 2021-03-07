@@ -92,7 +92,7 @@ def _write_public(fname, new_fname=None):
     return r['ResponseMetadata']['HTTPStatusCode']
 
 def request_and_write_image(url, spaces_folder):
-    print("getting image:", url, end=' ')
+    # print("getting image:", url, end=' ')
     try:
         r = requests.get(url, stream=True, timeout=10)
     except requests.exceptions.Timeout:
@@ -101,7 +101,7 @@ def request_and_write_image(url, spaces_folder):
     except Exception as e:
         print(url, e)
         return
-    print(r.status_code)
+    # print(r.status_code)
     if not r.ok:
         return
     # write locally
@@ -111,9 +111,9 @@ def request_and_write_image(url, spaces_folder):
                 break
             f.write(block)
     spaces_fname = image_fname('temp')
-    print("uploading", spaces_fname, "to data lake", end=' ')
+    # print("uploading", spaces_fname, "to data lake", end=' ')
     status = _write_public('temp', f'{spaces_folder}/{spaces_fname}')
-    print(status)
+    # print(status)
     if status < 400:
         return spaces_fname
 
@@ -148,7 +148,7 @@ def write_search_results(results):
     
     img_count = 0
     for term,result in results.iterterm():
-        print(term)
+        # print(term)
         for search_engine in [BAIDU, GOOGLE]:
             datalake_urls = []
             for url in result.urls[search_engine]:
@@ -160,7 +160,7 @@ def write_search_results(results):
                 if fname:
                     img_count += 1
                     datalake_urls.append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
-            print("done with", search_engine)
+            # print("done with", search_engine)
             result.set_datalake_urls(datalake_urls, search_engine)
         print('.', end='')
     print("finished writing images")
