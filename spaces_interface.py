@@ -92,12 +92,13 @@ def _write_public(fname, new_fname=None):
     return r['ResponseMetadata']['HTTPStatusCode']
 
 def request_and_write_image(url, spaces_folder):
+    print("getting image:", url, end=' ')
     try:
         r = requests.get(url, stream=True)
     except Exception as e:
         print(url, e)
         return
-    print(r.status_code, "getting image", url)
+    print(r.status_code)
     if not r.ok:
         return
     # write locally
@@ -107,7 +108,9 @@ def request_and_write_image(url, spaces_folder):
                 break
             f.write(block)
     spaces_fname = image_fname('temp')
+    print("uploading", spaces_fname, "to data lake", end=' ')
     status = _write_public('temp', f'{spaces_folder}/{spaces_fname}')
+    print(status)
     if status < 400:
         return spaces_fname
 
