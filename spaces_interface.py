@@ -150,7 +150,10 @@ def write_search_results(results):
             datalake_urls = []
             for url in result.urls[search_engine]:
                 spaces_folder = 'images/hashed'
-                fname = request_and_write_image(url, spaces_folder)
+                try:
+                    fname = request_and_write_image(url, spaces_folder)
+                except:
+                    continue
                 if fname:
                     img_count += 1
                     datalake_urls.append(f'{bucket_endpoint}/{spaces_folder}/{fname}')

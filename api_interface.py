@@ -56,7 +56,7 @@ def post_search(result, ip_address=None):
 
 def post_images(search_id, search_engine, urls):
     if len(urls) > 0:
-        print(f"posting {len(urls)} images associated with search ID {search_id}")
+        print(f"posting {len(urls)} images associated with search ID {search_id}", end='')
         body = {
             "search_id": search_id,
             "image_search_engine": search_engine,
