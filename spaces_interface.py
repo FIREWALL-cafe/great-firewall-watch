@@ -97,7 +97,7 @@ def request_and_write_image(url, spaces_folder):
     except Exception as e:
         print(url, e)
         return
-    # print(r.status_code, "getting image", url)
+    print(r.status_code, "getting image", url)
     if not r.ok:
         return
     # write locally
@@ -151,6 +151,7 @@ def write_search_results(results):
                     img_count += 1
                     datalake_urls.append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
             result.set_datalake_urls(datalake_urls, search_engine)
+        print('.', end='')
     return img_count
 
 def write_error(s, verbose=False):
@@ -241,7 +242,11 @@ def load_termlist():
     try:
         df = read_excel(base_url + 'termlist.xlsx').fillna('')
     except:
-        raise Exception("failed to load termlist at " + base_url + 'termlist.xlsx')
+        client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key='termlist.xlsx')
+        try:
+            df = read_excel(base_url + 'termlist.xlsx').fillna('')
+        except:
+            raise Exception("failed to load termlist at " + base_url + 'termlist.xlsx')
 
     needs_translation = False
     for i,row in df.fillna('').iterrows():
@@ -258,6 +263,27 @@ def load_termlist():
     df = create_link_columns(df)
     write_termlist(df)
     return df
+
+def load_termlist_folder(name='daily'):
+    '''
+    load all files with an _active prefix in the given folder, concatenating them into one termlist for the whole run
+    note that this concatenation will prevent the scraper from writing out any results from the scraper after it has run
+    '''
+    pass
+
+def preload_termlists():
+    '''
+    check all termlist folders for 1-to-1 correspondence between a given termlist and the activated version. activate any new termlist
+    and delete any active termlist that's had its input termlist deleted. 
+    '''
+    pass
+
+def activate_termlist(name):
+    '''
+    take a termlist which has been uploaded ("input termlist"), do any translation, linking, and formatting work, and save a copy with
+    an _active prefix, with permissions set to private
+    '''
+    pass
 
 def update_termlist(termlist, results):
     # update the termlist to have links to the searches in the API
