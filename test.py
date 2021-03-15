@@ -4,7 +4,7 @@ from pandas import DataFrame
 
 def terms_test():
     terms = ["apple", "banana", "carrot", "dragonfruit", "edamame", "fennel", "ginger"]
-    # terms = ["asparagus"]
+    terms = ["asparagus"]
     df = DataFrame([{"english":term, "chinese":"test"} for term in terms])
     run(termlist=df, shuffle=True)
 

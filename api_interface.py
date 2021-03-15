@@ -52,7 +52,13 @@ def post_search(result, ip_address=None):
         'search_term_status_sensitive': False,
         'search_schema_initial': None
     })
-    return r.json()[0]
+    if r.status_code > 300:
+        return None
+    post_result = r.json()[0]
+    if 'name' in post_result and post_result['name'] == 'error':
+        print("could not POST search", post_result['english_term'])
+        return None
+    return post_result
 
 def post_images(search_id, search_engine, urls):
     if len(urls) > 0:
@@ -79,12 +85,9 @@ def save_search_results(results):
     search_term_to_id = {}
     print(f"saving {results.length} search terms")
     for term,result in results.iterterm():
-        # print(search_engine, "results:", len(result))
         post_result = post_search(result, '192.168.0.1')
-        # for each result, for each url in result['urls'], call post image
-        # print("search", search)
-        if 'name' in post_result and post_result['name'] == 'error':
-            print("could not POST search", post_result['english_term'])
+        if not post_result:
+            raise Exception("failed to post result for term", term)
         post_images(post_result["search_id"], GOOGLE, result.get_datalake_urls(GOOGLE))
         post_images(post_result["search_id"], BAIDU, result.get_datalake_urls(BAIDU))
         search_term_to_id[result.combined_term()] = post_result["search_id"]
