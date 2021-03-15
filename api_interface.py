@@ -31,7 +31,7 @@ def get_ip():
 def post_search(result, ip_address=None):
     if not ip_address:
         ip_address = get_ip()
-    r = requests.post(BASE_URL + '/createSearch', timeout=10, data={
+    body = {
         'search_timestamp': int(1000*result.ts),
         # location of instance this is deployed on
         'search_location': config['location'] if 'location' in config else config['region'],
@@ -50,9 +50,13 @@ def post_search(result, ip_address=None):
         'search_term_translation_language_code':'zh-CN',
         'search_term_status_banned': False,
         'search_term_status_sensitive': False,
-        'search_schema_initial': None
-    })
+        'search_schema_initial': None,
+        'secret': config['api_secret']
+    }
+    print(body)
+    r = requests.post(BASE_URL + '/createSearch', timeout=10, data=body)
     if r.status_code > 300:
+        print("could not POST search")
         return None
     post_result = r.json()[0]
     if 'name' in post_result and post_result['name'] == 'error':
@@ -64,13 +68,13 @@ def post_images(search_id, search_engine, urls):
     if len(urls) > 0:
         print(f"posting {len(urls)} images associated with search ID {search_id}", end='')
         body = {
-            "search_id": search_id,
-            "image_search_engine": search_engine,
-            "urls": urls,
+            'search_id': search_id,
+            'image_search_engine': search_engine,
+            'urls': urls,
             # original_urls
-            "image_ranks": [i+1 for i,_ in enumerate(urls)]
+            'image_ranks': [i+1 for i,_ in enumerate(urls)],
+            'secret': config['api_secret']
         }
-        # print(body)
         r = requests.post(BASE_URL + '/saveImages', timeout=10, data=body)
         print("result:", r.status_code)
     else:
@@ -87,7 +91,7 @@ def save_search_results(results):
     for term,result in results.iterterm():
         post_result = post_search(result, '192.168.0.1')
         if not post_result:
-            raise Exception("failed to post result for term", term)
+            raise Exception("failed to post result for term " + term)
         post_images(post_result["search_id"], GOOGLE, result.get_datalake_urls(GOOGLE))
         post_images(post_result["search_id"], BAIDU, result.get_datalake_urls(BAIDU))
         search_term_to_id[result.combined_term()] = post_result["search_id"]
