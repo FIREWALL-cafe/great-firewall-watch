@@ -88,8 +88,12 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         except:
             print("out of terms")
             break
-        result = ResultSet(english_term, chinese_term)
-        print(f'request {i}, term idx {term_idx}: "{result.combined_term()}"')
+        try:
+            label = termlist.loc[term_idx].label
+        except Exception as e:
+            label = "automated_scraper"
+        result = ResultSet(english_term, chinese_term, label)
+        print(f'request {i}, term idx {term_idx}: "{result.combined_term()}", (label: {label})')
         if not english_term:
             print("\tskipping Google for term (English term not present)")
         else:

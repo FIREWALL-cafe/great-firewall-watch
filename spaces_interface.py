@@ -229,10 +229,12 @@ def write_termlist(df):
     r = client.put_object_acl(ACL='public-read', Bucket=j['bucket'], Key=fname)
     print("termlist write result:", r['ResponseMetadata']['HTTPStatusCode'])
     
-def create_link_columns(df):
+def add_datalake_links(df):
     '''
     Use the "english" and "chinese" columns in the termlist to create links to the digitalocean folders 
     with image results for the given terms
+
+    deprecating in favor of dataserve links
     '''
     def formatted_link(row, search_engine):
         # print("row:", row)
@@ -245,6 +247,9 @@ def create_link_columns(df):
         return spaces_endpoint + parse.quote_plus(folder_name)
     df['link_google'] = df.apply(lambda row: formatted_link(row, GOOGLE), axis='columns')
     df['link_baidu'] = df.apply(lambda row: formatted_link(row, BAIDU), axis='columns')
+    return df
+
+def add_dataserve_links(df):
     return df
 
 def load_termlist():
@@ -272,12 +277,16 @@ def load_termlist():
             needs_translation = True
     if needs_translation:
         df = machine_translate(df)
-    df = create_link_columns(df)
+
+    # TODO: check if we need to even do this
+    df = add_dataserve_links(df)
     write_termlist(df)
+
     return df
 
 def load_termlist_folder(name='daily'):
     '''
+    PLACEHOLDER (implement when we _need_ multiple termlists)
     load all files with an _active prefix in the given folder, concatenating them into one termlist for the whole run
     note that this concatenation will prevent the scraper from writing out any results from the scraper after it has run
     '''
@@ -285,6 +294,7 @@ def load_termlist_folder(name='daily'):
 
 def preload_termlists():
     '''
+    PLACEHOLDER (implement when we _need_ multiple termlists)
     check all termlist folders for 1-to-1 correspondence between a given termlist and the activated version. activate any new termlist
     and delete any active termlist that's had its input termlist deleted. 
     '''
@@ -292,6 +302,7 @@ def preload_termlists():
 
 def activate_termlist(name):
     '''
+    PLACEHOLDER (implement when we _need_ multiple termlists)
     take a termlist which has been uploaded ("input termlist"), do any translation, linking, and formatting work, and save a copy with
     an _active prefix, with permissions set to private
     '''

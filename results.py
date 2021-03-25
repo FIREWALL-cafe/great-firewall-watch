@@ -5,9 +5,10 @@ class ResultSet:
     '''
     Serves as the data store for a single term
     '''
-    def __init__(self, english_term, chinese_term):
+    def __init__(self, english_term, chinese_term, label):
         self.english_term = english_term
         self.chinese_term = chinese_term
+        self.label = label
         self.urls = {'google':[], 'baidu':[]}
         self.datalake_urls = {'google':[], 'baidu':[]}
 
