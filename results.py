@@ -11,6 +11,7 @@ class ResultSet:
         self.label = label
         self.urls = {'google':[], 'baidu':[]}
         self.datalake_urls = {'google':[], 'baidu':[]}
+        self.ts = time.time()
 
     def add(self, urls, search_engine):
         if len(self.urls[search_engine]) > 0:
