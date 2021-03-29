@@ -36,7 +36,7 @@ class ResultSetList:
 
     def __init__(self):
         self.dict = {}
-        self.wrote = {}
+        self.wrote = {'google':0, 'baidu':0}
 
     def add(self, result):
         term = result.combined_term()
