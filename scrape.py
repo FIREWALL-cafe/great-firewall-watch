@@ -85,8 +85,8 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         try:
             english_term = termlist.loc[term_idx].english
             chinese_term = termlist.loc[term_idx].chinese
-        except:
-            print("out of terms")
+        except Exception as e:
+            print("out of terms", term_idx, str(e))
             break
         try:
             label = termlist.loc[term_idx].label
