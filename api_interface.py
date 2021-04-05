@@ -7,6 +7,7 @@ from watch_utils import BAIDU, GOOGLE
 For storing the results of the scraping
 '''
 
+# note: this will be superceded by any API URL defined in config.json
 BASE_URL = 'http://api.firewallcafe.com'
 # BASE_URL = 'http://159.89.80.47'
 with open('config.json') as f:
@@ -36,7 +37,7 @@ def post_search(result, ip_address=None):
         # location of instance this is deployed on
         'search_location': config['location'] if 'location' in config else config['region'],
         'search_ip_address': ip_address,
-        'search_client_name':'automated_scraper',
+        'search_client_name': result.label,
 
         # what do these two terms mean?
         'search_engine_initial': None,
@@ -56,7 +57,7 @@ def post_search(result, ip_address=None):
     print(body)
     r = requests.post(BASE_URL + '/createSearch', timeout=10, data=body)
     if r.status_code > 300:
-        print("could not POST search")
+        print("could not POST search", r.status_code, r.text)
         return None
     post_result = r.json()[0]
     if 'name' in post_result and post_result['name'] == 'error':

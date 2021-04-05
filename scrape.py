@@ -80,16 +80,20 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
 
     start_ts = time.time()
     for i in range(0, total_requests):
-        term_idx = term_indices.pop()
         start_iter_ts = time.time()
         try:
+            term_idx = term_indices.pop()
             english_term = termlist.loc[term_idx].english
             chinese_term = termlist.loc[term_idx].chinese
-        except:
-            print("out of terms")
+        except Exception as e:
+            print("out of terms", term_idx, str(e))
             break
-        result = ResultSet(english_term, chinese_term)
-        print(f'request {i}, term idx {term_idx}: "{result.combined_term()}"')
+        try:
+            label = termlist.loc[term_idx].label
+        except Exception as e:
+            label = "automated_scraper"
+        result = ResultSet(english_term, chinese_term, label)
+        print(f'request {i}, term idx {term_idx}: "{result.combined_term()}", (label: {label})')
         if not english_term:
             print("\tskipping Google for term (English term not present)")
         else:
