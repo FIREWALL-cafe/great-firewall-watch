@@ -8,8 +8,8 @@ For storing the results of the scraping
 '''
 
 # note: this will be superceded by any API URL defined in config.json
-BASE_URL = 'http://api.firewallcafe.com'
-# BASE_URL = 'http://159.89.80.47'
+# BASE_URL = 'http://api.firewallcafe.com'
+BASE_URL = 'http://test-api.firewallcafe.com'
 with open('config.json') as f:
     config = json.loads(f.read())
     try:
@@ -65,19 +65,22 @@ def post_search(result, ip_address=None):
         return None
     return post_result
 
-def post_images(search_id, search_engine, urls):
+def post_images(search_id, search_engine, urls, original_urls=[]):
     if len(urls) > 0:
-        print(f"posting {len(urls)} images associated with search ID {search_id}", end='')
+        print(f"posting {len(urls)} images associated with search ID {search_id}", end=' ')
         body = {
             'search_id': search_id,
             'image_search_engine': search_engine,
             'urls': urls,
-            # original_urls
+            'original_urls': original_urls,
             'image_ranks': [i+1 for i,_ in enumerate(urls)],
             'secret': config['api_secret']
         }
         r = requests.post(BASE_URL + '/saveImages', timeout=10, data=body)
-        print("result:", r.status_code)
+        if r.status_code >= 300:
+            print("result:", r.status_code, r.json())
+        else:
+            print("result:", r.status_code)
     else:
         pass
 
@@ -93,8 +96,14 @@ def save_search_results(results):
         post_result = post_search(result, '192.168.0.1')
         if not post_result:
             raise Exception("failed to post result for term " + term)
-        post_images(post_result["search_id"], GOOGLE, result.get_datalake_urls(GOOGLE))
-        post_images(post_result["search_id"], BAIDU, result.get_datalake_urls(BAIDU))
+        if len(result.urls[GOOGLE]) != len(result.get_datalake_urls(GOOGLE)):
+            post_images(post_result["search_id"], GOOGLE, result.get_datalake_urls(GOOGLE))
+        else:
+            post_images(post_result["search_id"], GOOGLE, result.get_datalake_urls(GOOGLE), result.urls[GOOGLE])
+        if len(result.urls[BAIDU]) != len(result.get_datalake_urls(BAIDU)):
+            post_images(post_result["search_id"], BAIDU, result.get_datalake_urls(BAIDU))
+        else:
+            post_images(post_result["search_id"], BAIDU, result.get_datalake_urls(BAIDU), result.urls[BAIDU])
         search_term_to_id[result.combined_term()] = post_result["search_id"]
     return search_term_to_id
 
