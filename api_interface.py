@@ -78,7 +78,10 @@ def post_images(search_id, search_engine, urls, original_urls=[]):
         }
         r = requests.post(BASE_URL + '/saveImages', timeout=10, data=body)
         if r.status_code >= 300:
-            print("result:", r.status_code, r.json())
+            try:
+                print("result:", r.status_code, r.json())
+            except json.decoder.JSONDecodeError:
+                print("result:", r.status_code, r.text)
         else:
             print("result:", r.status_code)
     else:
