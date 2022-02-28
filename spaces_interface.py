@@ -3,7 +3,6 @@ from botocore.client import Config
 from boto3.s3.transfer import S3Transfer, TransferConfig
 import csv
 from datetime import datetime
-import hashlib
 import imagehash
 import imghdr
 import json
@@ -161,7 +160,10 @@ def write_search_results(results):
                     img_count += 1
                     datalake_urls.append(f'{bucket_endpoint}/{spaces_folder}/{fname}')
             # print("done with", search_engine)
-            result.set_datalake_urls(datalake_urls, search_engine)
+            try:
+                result.set_datalake_urls(datalake_urls, search_engine)
+            except Exception as e:
+                print(e)
         print('.', end='')
     print("finished writing images")
     return img_count
