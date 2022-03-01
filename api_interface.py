@@ -96,18 +96,21 @@ def save_search_results(results):
     search_term_to_id = {}
     print(f"saving {results.length} search terms")
     for term,result in results.iterterm():
-        post_result = post_search(result, '192.168.0.1')
-        if not post_result:
-            raise Exception("failed to post result for term " + term)
-        if len(result.urls[GOOGLE]) != len(result.get_datalake_urls(GOOGLE)):
-            post_images(post_result["search_id"], GOOGLE, result.get_datalake_urls(GOOGLE))
-        else:
-            post_images(post_result["search_id"], GOOGLE, result.get_datalake_urls(GOOGLE), result.urls[GOOGLE])
-        if len(result.urls[BAIDU]) != len(result.get_datalake_urls(BAIDU)):
-            post_images(post_result["search_id"], BAIDU, result.get_datalake_urls(BAIDU))
-        else:
-            post_images(post_result["search_id"], BAIDU, result.get_datalake_urls(BAIDU), result.urls[BAIDU])
-        search_term_to_id[result.combined_term()] = post_result["search_id"]
+        try:
+            post_result = post_search(result, '192.168.0.1')
+            if not post_result:
+                raise Exception("failed to post result for term " + term)
+            if len(result.urls[GOOGLE]) != len(result.get_datalake_urls(GOOGLE)):
+                post_images(post_result["search_id"], GOOGLE, result.get_datalake_urls(GOOGLE))
+            else:
+                post_images(post_result["search_id"], GOOGLE, result.get_datalake_urls(GOOGLE), result.urls[GOOGLE])
+            if len(result.urls[BAIDU]) != len(result.get_datalake_urls(BAIDU)):
+                post_images(post_result["search_id"], BAIDU, result.get_datalake_urls(BAIDU))
+            else:
+                post_images(post_result["search_id"], BAIDU, result.get_datalake_urls(BAIDU), result.urls[BAIDU])
+            search_term_to_id[result.combined_term()] = post_result["search_id"]
+        except Exception as e:
+            print(f"got error on {term}: \n{e}")
     return search_term_to_id
 
 if __name__ == "__main__":
