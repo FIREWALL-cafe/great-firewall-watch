@@ -1,5 +1,8 @@
 {
+    "api_url": "https://test-api.firewallcafe.com",
+    "api_secret": "<str>",
     "bucket": "<url>",
+    "location": "<str>",
     "region": "<str>",
     "access_key_id": "<str>",
     "secret_access_key": "<str>",

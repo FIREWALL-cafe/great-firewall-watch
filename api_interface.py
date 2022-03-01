@@ -8,8 +8,8 @@ For storing the results of the scraping
 '''
 
 # note: this will be superceded by any API URL defined in config.json
-# BASE_URL = 'http://api.firewallcafe.com'
-BASE_URL = 'http://test-api.firewallcafe.com'
+# BASE_URL = 'https://api.firewallcafe.com'
+BASE_URL = 'https://test-api.firewallcafe.com'
 with open('config.json') as f:
     config = json.loads(f.read())
     try:
