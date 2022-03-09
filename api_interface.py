@@ -76,7 +76,7 @@ def post_images(search_id, search_engine, urls, original_urls=[]):
             'image_ranks': [i+1 for i,_ in enumerate(urls)],
             'secret': config['api_secret']
         }
-        r = requests.post(BASE_URL + '/saveSearchAndImages', timeout=10, data=body)
+        r = requests.post(BASE_URL + '/saveSearchAndImages', timeout=50, data=body)
         if r.status_code >= 300:
             try:
                 print("result:", r.status_code, r.json())
