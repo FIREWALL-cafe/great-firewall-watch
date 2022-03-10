@@ -54,7 +54,7 @@ def post_search(result, ip_address=None):
         'search_schema_initial': None,
         'secret': config['api_secret']
     }
-    print(body)
+    print("post_search body:", body)
     r = requests.post(BASE_URL + '/createSearch', timeout=10, data=body)
     if r.status_code > 300:
         print("could not POST search", r.status_code, r.text)
@@ -76,7 +76,7 @@ def post_images(search_id, search_engine, urls, original_urls=[]):
             'image_ranks': [i+1 for i,_ in enumerate(urls)],
             'secret': config['api_secret']
         }
-        r = requests.post(BASE_URL + '/saveSearchAndImages', timeout=50, data=body)
+        r = requests.post(BASE_URL + '/saveImages', timeout=50, data=body)
         if r.status_code >= 300:
             try:
                 print("result:", r.status_code, r.json())

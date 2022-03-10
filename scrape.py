@@ -15,6 +15,7 @@ import requests
 import time
 
 MAX_PICTURES_PER = 10
+SEARCH_BATCH_SIZE = 25 # how many searches to complete before pushing them to the API
 
 def query_baidu(term):
     user_agent = get_user_agent()
@@ -124,7 +125,7 @@ def run(total_hours=24, hourly_limit=300, shuffle=False, termlist=None):
         # print("adding noise to wait time", printable_time(seconds=time_noise))
 
         # cache results. this is a backup and not meant to be a reliable data store
-        if i % 25 == 24:
+        if i % SEARCH_BATCH_SIZE == SEARCH_BATCH_SIZE - 1:
             try:
                 update_results(results)
                 results.clear()
