@@ -1,5 +1,19 @@
 # Great Firewall Watch
 
+> Automated monitoring and tracking of internet censorship patterns
+
+![Status](https://img.shields.io/badge/status-inactive-yellow.svg)
+![Language](https://img.shields.io/badge/language-Python-blue.svg)
+![Last Updated](https://img.shields.io/badge/last%20updated-March%202022-orange.svg)
+
+## ⚠️ Archive Notice
+
+**This repository is no longer actively maintained.** It contains historical research code for automated censorship monitoring. For the current active project, please see [firewall-client-server](https://github.com/FIREWALL-cafe/firewall-client-server).
+
+---
+
+## Original Documentation
+
 Automated tracking of censorship via image search results, for the [Firewall Cafe](https://firewallcafe.com/) project.
 
 The scraper is designed to be called by a regular cron job, making its way through a list of terms to be searched on Google and Baidu. It relies on DigitalOcean spaces for the term list, as well as outputting logs and storing images.
@@ -59,3 +73,33 @@ The default behavior of the scraper is to query a maximum of 200 requests per ho
 **spaces_interface.py**: used for reading and writing files to the Space.
 
 **translate.py**: handles English <=> Mandarin translation.
+
+---
+
+## 🔗 Current Development
+
+Active development has moved to:
+- **[firewall-client-server](https://github.com/FIREWALL-cafe/firewall-client-server)** - Modern implementation with enhanced features
+- **[firewall-web-app](https://github.com/FIREWALL-cafe/firewall-web-app)** - Current web deployment
+
+## 🔬 Research Value
+
+This repository contains valuable historical data and methodologies for:
+- Understanding early censorship detection techniques
+- Analyzing search result disparities over time
+- Developing automated monitoring systems
+- Research into visual content filtering
+
+## 📄 License
+
+MIT License
+
+## 📞 Contact
+
+- **Current Project**: [firewall-client-server](https://github.com/FIREWALL-cafe/firewall-client-server)
+- **Website**: [firewallcafe.com](https://firewallcafe.com)
+- **Email**: info@firewallcafe.com
+
+---
+
+*Part of the Firewall Cafe research archive - Understanding internet freedom through data*
